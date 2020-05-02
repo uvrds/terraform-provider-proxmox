@@ -33,7 +33,5 @@ func Req(data Data, insecure bool) io.ReadCloser {
 	if err != nil {
 		log.Fatal(err)
 	}
-	//
 	return resp.Body
-
 }
