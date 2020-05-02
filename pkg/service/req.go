@@ -26,7 +26,6 @@ func Req(data Data, insecure bool) io.ReadCloser {
 	}
 	client := &http.Client{Transport: tr}
 	req, err := http.NewRequest(data.Method, data.Path, body)
-	req.Header.Set("Content-Type", "application/json")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -34,7 +33,7 @@ func Req(data Data, insecure bool) io.ReadCloser {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer resp.Body.Close()
+	//
 	return resp.Body
 
 }
