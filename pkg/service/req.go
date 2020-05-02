@@ -3,8 +3,8 @@ package service
 import (
 	"bytes"
 	"crypto/tls"
+	log "github.com/sirupsen/logrus"
 	"io"
-	"log"
 	"net/http"
 )
 
@@ -13,6 +13,8 @@ type Data struct {
 	Path   string
 	Body   *bytes.Buffer
 }
+
+var pack = "service"
 
 func Req(data Data, insecure bool) io.ReadCloser {
 	tr := &http.Transport{
@@ -27,11 +29,21 @@ func Req(data Data, insecure bool) io.ReadCloser {
 	client := &http.Client{Transport: tr}
 	req, err := http.NewRequest(data.Method, data.Path, body)
 	if err != nil {
-		log.Fatal(err)
+		log.WithFields(log.Fields{
+			"package":  pack,
+			"function": "Req",
+			"error":    err,
+			"data":     data.Method + " " + data.Path,
+		}).Fatal("Response", err)
 	}
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Fatal(err)
+		log.WithFields(log.Fields{
+			"package":  pack,
+			"function": "Req",
+			"error":    err,
+			"data":     req,
+		}).Fatal("Response", err)
 	}
 	return resp.Body
 }

@@ -2,12 +2,10 @@ package model
 
 import (
 	"bytes"
-	"fmt"
+	log "github.com/sirupsen/logrus"
 	"github.com/terraform-provider-proxmox/pkg/service"
 	"io/ioutil"
-	"log"
 	"os"
-	"strconv"
 )
 
 type AuthStruct struct {
@@ -17,10 +15,25 @@ type AuthStruct struct {
 	Insecure bool
 }
 
+var pack = "proxmox"
+
+type Cookie struct {
+	Data struct {
+		CSRFPreventionToken string `json:"CSRFPreventionToken"`
+		Ticket              string `json:"ticket"`
+		Username            string `json:"username"`
+	} `json:"data"`
+}
+
 func Auth() {
-	b, err := strconv.ParseBool(os.Getenv("INSECURE"))
-	if err != nil {
-		log.Fatal(err)
+	var b bool
+	ins := os.Getenv("INSECURE")
+	if ins == "" {
+		b = false
+	} else if ins == "true" {
+		b = true
+	} else {
+		b = false
 	}
 	au := AuthStruct{
 		Username: os.Getenv("USER"),
@@ -38,8 +51,17 @@ func Auth() {
 	defer resp.Close()
 	content, err := ioutil.ReadAll(resp)
 	if err != nil {
-		log.Fatal(err)
+		log.WithFields(log.Fields{
+			"package":  pack,
+			"function": "Auth",
+			"error":    err,
+			"data":     rq,
+		}).Fatal("Response", err)
 	}
-	fmt.Println(string(content))
+	log.WithFields(log.Fields{
+		"package":  pack,
+		"function": "Auth",
+		"data":     rq,
+	}).Debug("Response", string(content))
 
 }
