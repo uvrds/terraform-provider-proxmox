@@ -1,16 +1,19 @@
 package model
 
-import "fmt"
+import (
+	"fmt"
+	"os"
+)
 
 type AuthStruct struct {
 	Username string
 	Password string
 }
 
-func Auth(user string, pass string) {
+func Auth() {
 	au := AuthStruct{
-		Username: user,
-		Password: pass,
+		Username: os.Getenv("USER"),
+		Password: os.Getenv("PASS"),
 	}
 
 	fmt.Println(au)
