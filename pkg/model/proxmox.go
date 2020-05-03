@@ -2,6 +2,7 @@ package model
 
 import (
 	"bytes"
+	"encoding/json"
 	log "github.com/sirupsen/logrus"
 	"github.com/terraform-provider-proxmox/pkg/service"
 	"io/ioutil"
@@ -25,7 +26,7 @@ type Cookie struct {
 	} `json:"data"`
 }
 
-func Auth() {
+func Auth() (Cookie, error) {
 	var b bool
 	ins := os.Getenv("INSECURE")
 	if ins == "" {
@@ -47,7 +48,15 @@ func Auth() {
 		Body:   bytes.NewBuffer([]byte("username=" + au.Username + "&password=" + au.Password)),
 	}
 
-	resp := service.Req(rq, au.Insecure)
+	resp, err := service.Req(rq, au.Insecure)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"package":  pack,
+			"function": "Auth",
+			"error":    err,
+			"data":     rq,
+		}).Fatal("Response", err)
+	}
 	defer resp.Close()
 	content, err := ioutil.ReadAll(resp)
 	if err != nil {
@@ -64,4 +73,11 @@ func Auth() {
 		"data":     rq,
 	}).Debug("Response", string(content))
 
+	var respCookie Cookie
+	err = json.Unmarshal(content, &respCookie)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return respCookie, nil
 }

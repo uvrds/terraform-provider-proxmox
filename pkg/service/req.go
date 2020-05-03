@@ -16,7 +16,7 @@ type Data struct {
 
 var pack = "service"
 
-func Req(data Data, insecure bool) io.ReadCloser {
+func Req(data Data, insecure bool) (io.ReadCloser, error) {
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: insecure},
 	}
@@ -45,5 +45,5 @@ func Req(data Data, insecure bool) io.ReadCloser {
 			"data":     req,
 		}).Fatal("Response", err)
 	}
-	return resp.Body
+	return resp.Body, nil
 }
