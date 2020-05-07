@@ -67,6 +67,7 @@ func (api *API) req(data Data) error {
 	if err != nil {
 		return err
 	}
+	//TODO проверить на nil
 	fmt.Println(string(content))
 	if data.Path == "/access/ticket" {
 		var respCookie Cookie
