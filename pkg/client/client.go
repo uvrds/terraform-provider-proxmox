@@ -109,3 +109,17 @@ func (api *API) GetStatus(node string, id string) error {
 	}
 	return nil
 }
+
+func (api *API) CreateLxc(node string) error {
+
+	rq := Data{
+		Method: "POST",
+		Path:   "/nodes/" + node + "/lxc",
+		Body:   nil,
+	}
+	err := api.req(rq)
+	if err != nil {
+		return err
+	}
+	return nil
+}

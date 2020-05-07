@@ -49,6 +49,7 @@ func main() {
 	}
 	t.Client = &http.Client{Transport: tr}
 	err := t.Authenticate()
-	err = t.GetStatus("pve", "101")
+	//err = t.GetStatus("pve", "101")
+	err = t.CreateLxc("pve")
 	fmt.Println(err)
 }
