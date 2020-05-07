@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 )
@@ -44,11 +45,13 @@ type Cookie struct {
 }
 
 func (api *API) req(data Data) error {
-
-	if api.Auth == false {
-		api.authenticate()
+	var body io.Reader
+	if data.Body != nil {
+		body = data.Body
+	} else {
+		body = nil
 	}
-	req, err := http.NewRequest(data.Method, api.BaseURL+data.Path, data.Body)
+	req, err := http.NewRequest(data.Method, api.BaseURL+data.Path, body)
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Cookie", fmt.Sprintf("PVEAuthCookie=%s", api.ticket))
 	req.Header.Set("CSRFPreventionToken", api.csrfPreventionToken)
@@ -64,6 +67,7 @@ func (api *API) req(data Data) error {
 	if err != nil {
 		return err
 	}
+	fmt.Println(string(content))
 	if data.Path == "/access/ticket" {
 		var respCookie Cookie
 		err = json.Unmarshal(content, &respCookie)
@@ -77,12 +81,27 @@ func (api *API) req(data Data) error {
 	return nil
 }
 
-func (api *API) authenticate() error {
+func (api *API) Authenticate() error {
 
 	rq := Data{
 		Method: "POST",
 		Path:   "/access/ticket",
 		Body:   bytes.NewBuffer([]byte("username=" + api.Username + "&password=" + api.Password)),
+	}
+	if api.Auth == false {
+		err := api.req(rq)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (api *API) GetStatus(node string, id string) error {
+	rq := Data{
+		Method: "GET",
+		Path:   "/nodes/" + node + "/qemu/" + id + "/status/current",
+		Body:   nil,
 	}
 	err := api.req(rq)
 	if err != nil {

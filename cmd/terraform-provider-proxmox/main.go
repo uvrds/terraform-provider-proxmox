@@ -2,6 +2,7 @@ package main
 
 import (
 	"crypto/tls"
+	"fmt"
 	log "github.com/sirupsen/logrus"
 	"github.com/terraform-provider-proxmox/pkg/client"
 	"net/http"
@@ -47,5 +48,6 @@ func main() {
 		TLSClientConfig:    &tls.Config{InsecureSkipVerify: true},
 	}
 	t.Client = &http.Client{Transport: tr}
-
+	err := t.GetStatus("pve", "101")
+	fmt.Println(err)
 }
