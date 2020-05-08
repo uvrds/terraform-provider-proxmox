@@ -6,7 +6,7 @@ import (
 	"github.com/terraform-provider-proxmox/pkg/client"
 )
 
-func resourceItem() *schema.Resource {
+func resourceLxc() *schema.Resource {
 	fmt.Print()
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
@@ -17,6 +17,9 @@ func resourceItem() *schema.Resource {
 			},
 		},
 		Create: resourceCreateLxc,
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 	}
 }
 

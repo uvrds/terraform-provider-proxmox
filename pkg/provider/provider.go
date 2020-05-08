@@ -26,7 +26,7 @@ func Provider() terraform.ResourceProvider {
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
-			"example_item": resourceItem(),
+			"proxmox_lxc": resourceLxc(),
 		},
 		ConfigureFunc: providerConfigure,
 	}

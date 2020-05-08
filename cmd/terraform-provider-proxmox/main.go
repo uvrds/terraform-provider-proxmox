@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/hashicorp/terraform/plugin"
+	"github.com/hashicorp/terraform/terraform"
 	log "github.com/sirupsen/logrus"
 	"github.com/terraform-provider-proxmox/pkg/provider"
 	"os"
@@ -52,8 +53,11 @@ func init() {
 //	//}
 //
 //}
+
 func main() {
 	plugin.Serve(&plugin.ServeOpts{
-		ProviderFunc: provider.Provider,
+		ProviderFunc: func() terraform.ResourceProvider {
+			return provider.Provider()
+		},
 	})
 }
