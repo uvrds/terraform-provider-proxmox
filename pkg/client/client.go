@@ -7,6 +7,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 )
 
 type API struct {
@@ -33,7 +34,7 @@ func NewClient(baseURL string, username string, password string) *API {
 type Data struct {
 	Method string
 	Path   string
-	Body   *bytes.Buffer
+	Body   map[string]string
 }
 
 type Cookie struct {
@@ -47,7 +48,11 @@ type Cookie struct {
 func (api *API) req(data Data) error {
 	var body io.Reader
 	if data.Body != nil {
-		body = data.Body
+		values := make(url.Values)
+		for k, v := range data.Body {
+			values.Set(k, v)
+		}
+		body = bytes.NewBufferString(values.Encode())
 	} else {
 		body = nil
 	}
@@ -83,11 +88,12 @@ func (api *API) req(data Data) error {
 }
 
 func (api *API) Authenticate() error {
+	body := map[string]string{"username": api.Username, "password": api.Password}
 
 	rq := Data{
 		Method: "POST",
 		Path:   "/access/ticket",
-		Body:   bytes.NewBuffer([]byte("username=" + api.Username + "&password=" + api.Password)),
+		Body:   body,
 	}
 	if api.Auth == false {
 		err := api.req(rq)
@@ -113,10 +119,16 @@ func (api *API) GetStatus(node string, id string) error {
 
 func (api *API) CreateLxc(node string) error {
 
+	body := map[string]string{
+		"ostemplate": "local:vztmpl/ubuntu-18.04-standard_18.04.1-1_amd64.tar.gz",
+		"vmid":       "601",
+		"storage":    "local-lvm",
+	}
+
 	rq := Data{
 		Method: "POST",
 		Path:   "/nodes/" + node + "/lxc",
-		Body:   nil,
+		Body:   body,
 	}
 	err := api.req(rq)
 	if err != nil {
