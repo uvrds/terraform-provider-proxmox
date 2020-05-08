@@ -10,7 +10,7 @@ func resourceLxc() *schema.Resource {
 	fmt.Print()
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
-			"name": {
+			"node": {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "The name of the resource, also acts as it's unique ID",
