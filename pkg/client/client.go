@@ -88,12 +88,12 @@ func (api *API) req(data Data) error {
 }
 
 func (api *API) Authenticate() error {
-	body := map[string]string{"username": api.Username, "password": api.Password}
+	options := map[string]string{"username": api.Username, "password": api.Password}
 
 	rq := Data{
 		Method: "POST",
 		Path:   "/access/ticket",
-		Body:   body,
+		Body:   options,
 	}
 	if api.Auth == false {
 		err := api.req(rq)
@@ -119,7 +119,7 @@ func (api *API) GetStatus(node string, id string) error {
 
 func (api *API) CreateLxc(node string) error {
 
-	body := map[string]string{
+	options := map[string]string{
 		"ostemplate": "local:vztmpl/ubuntu-18.04-standard_18.04.1-1_amd64.tar.gz",
 		"vmid":       "601",
 		"storage":    "local-lvm",
@@ -128,7 +128,7 @@ func (api *API) CreateLxc(node string) error {
 	rq := Data{
 		Method: "POST",
 		Path:   "/nodes/" + node + "/lxc",
-		Body:   body,
+		Body:   options,
 	}
 	err := api.req(rq)
 	if err != nil {
