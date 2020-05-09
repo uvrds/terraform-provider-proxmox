@@ -16,22 +16,34 @@ func resourceLxc() *schema.Resource {
 				Description: "The name of the resource, also acts as it's unique ID",
 			},
 		},
-		Create: resourceCreateLxc,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+		Create: resourceLxcCreate,
+		Read:   resourceServerRead,
+		Update: resourceServerUpdate,
+		Delete: resourceServerDelete,
 	}
 }
 
-func resourceCreateLxc(d *schema.ResourceData, m interface{}) error {
+func resourceLxcCreate(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*client.API)
 
 	name := d.Get("name").(string)
-
+	d.SetId(name)
 	err := apiClient.Authenticate()
 	err = apiClient.CreateLxc(name)
 	if err != nil {
 		return err
 	}
+	return resourceServerRead(d, m)
+}
+
+func resourceServerRead(d *schema.ResourceData, m interface{}) error {
+	return nil
+}
+
+func resourceServerUpdate(d *schema.ResourceData, m interface{}) error {
+	return resourceServerRead(d, m)
+}
+
+func resourceServerDelete(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
