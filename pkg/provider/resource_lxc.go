@@ -1,12 +1,9 @@
 package provider
 
 import (
-	"crypto/tls"
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/terraform-provider-proxmox/pkg/client"
-	"net/http"
-	"time"
 )
 
 func resourceLxc() *schema.Resource {
@@ -16,7 +13,7 @@ func resourceLxc() *schema.Resource {
 			"node": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "The name of the resource, also acts as it's unique ID",
+				Description: "The name of lxc container",
 			},
 		},
 		Create: resourceLxcCreate,
@@ -29,19 +26,10 @@ func resourceLxc() *schema.Resource {
 func resourceLxcCreate(d *schema.ResourceData, m interface{}) error {
 
 	apiClient := m.(*client.API)
-
-	tr := &http.Transport{
-		MaxIdleConns:       10,
-		IdleConnTimeout:    30 * time.Second,
-		DisableCompression: true,
-		TLSClientConfig:    &tls.Config{InsecureSkipVerify: true},
-	}
-	apiClient.Client = &http.Client{Transport: tr}
-
-	name := d.Get("node").(string)
-	d.SetId(name)
+	node := d.Get("node").(string)
+	d.SetId(node)
 	err := apiClient.Authenticate()
-	err = apiClient.CreateLxc(name)
+	err = apiClient.CreateLxc(node)
 	if err != nil {
 		return err
 	}

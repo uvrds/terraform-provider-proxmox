@@ -2,12 +2,14 @@ package client
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"time"
 )
 
 type API struct {
@@ -22,13 +24,21 @@ type API struct {
 	Auth bool
 }
 
-func NewClient(baseURL string, username string, password string) *API {
+func NewClient(baseURL string, username string, password string, insecure bool) *API {
+	tr := &http.Transport{
+		MaxIdleConns:       10,
+		IdleConnTimeout:    30 * time.Second,
+		DisableCompression: true,
+		TLSClientConfig:    &tls.Config{InsecureSkipVerify: insecure},
+	}
+
 	return &API{
 		BaseURL:  baseURL,
 		Username: username,
 		Password: password,
-		Client:   &http.Client{},
+		Client:   &http.Client{Transport: tr},
 	}
+
 }
 
 type Data struct {

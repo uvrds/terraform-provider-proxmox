@@ -23,18 +23,7 @@ func init() {
 }
 
 //func main() {
-//	//cookie, err := model.Auth()
-//	//if err != nil {
-//	//	log.WithFields(log.Fields{
-//	//		"package":  pack,
-//	//		"function": "Req",
-//	//		"error":    err,
-//	//		"data":     nil,
-//	//	}).Fatal("Response", err)
-//	//}
-//	//
-//	//fmt.Println(cookie)
-//	//
+//
 //		BaseURL := "https://192.168.122.54:8006/api2/json"
 //		Username := "root@pam"
 //		Password := "asdqz123"
