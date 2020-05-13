@@ -10,19 +10,20 @@ func Provider() terraform.ResourceProvider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			"address": {
-				Type:        schema.TypeString,
-				Required:    true,
-				DefaultFunc: schema.EnvDefaultFunc("SERVICE_ADDRESS", ""),
+				Type:     schema.TypeString,
+				Required: true,
 			},
 			"user": {
-				Type:        schema.TypeString,
-				Required:    true,
-				DefaultFunc: schema.EnvDefaultFunc("SERVICE_USER", ""),
+				Type:     schema.TypeString,
+				Required: true,
 			},
 			"password": {
-				Type:        schema.TypeString,
-				Required:    true,
-				DefaultFunc: schema.EnvDefaultFunc("SERVICE_PASSWORD", ""),
+				Type:     schema.TypeString,
+				Required: true,
+			},
+			"insecure": {
+				Type:     schema.TypeBool,
+				Required: true,
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
@@ -36,5 +37,6 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	address := d.Get("address").(string)
 	user := d.Get("user").(string)
 	password := d.Get("password").(string)
-	return client.NewClient(address, user, password), nil
+	ins := d.Get("insecure").(bool)
+	return client.NewClient(address, user, password, ins), nil
 }
