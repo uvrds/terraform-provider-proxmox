@@ -35,24 +35,22 @@ func init() {
 //	//
 //	//fmt.Println(cookie)
 //	//
-//	//	BaseURL := "https://192.168.122.54:8006/api2/json"
-//	//	Username := "root@pam"
-//	//	Password := "asdqz123"
-//	//	t := client.NewClient(BaseURL, Username, Password)
-//	//	tr := &http.Transport{
-//	//		MaxIdleConns:       10,
-//	//		IdleConnTimeout:    30 * time.Second,
-//	//		DisableCompression: true,
-//	//		TLSClientConfig:    &tls.Config{InsecureSkipVerify: true},
-//	//	}
-//	//	t.Client = &http.Client{Transport: tr}
-//	//	err := t.Authenticate()
-//	//	//err = t.GetStatus("pve", "101")
-//	//	err = t.CreateLxc("pve")
-//	//	fmt.Println(err)
-//	//}
-//
-//}
+//		BaseURL := "https://192.168.122.54:8006/api2/json"
+//		Username := "root@pam"
+//		Password := "asdqz123"
+//		t := client.NewClient(BaseURL, Username, Password)
+//		tr := &http.Transport{
+//			MaxIdleConns:       10,
+//			IdleConnTimeout:    30 * time.Second,
+//			DisableCompression: true,
+//			TLSClientConfig:    &tls.Config{InsecureSkipVerify: true},
+//		}
+//		t.Client = &http.Client{Transport: tr}
+//		err := t.Authenticate()
+//		//err = t.GetStatus("pve", "101")
+//		err = t.CreateLxc("pve")
+//		fmt.Println(err)
+//	}
 
 func main() {
 	plugin.Serve(&plugin.ServeOpts{
