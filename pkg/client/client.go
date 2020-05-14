@@ -18,7 +18,7 @@ type Lxc struct {
 	Ostemplate string
 	Storage    string
 	Node       string
-	Name       string
+	Hostname   string
 }
 
 func (api *API) CreateLxc(data Lxc) error {
@@ -28,6 +28,7 @@ func (api *API) CreateLxc(data Lxc) error {
 		"ostemplate": data.Ostemplate,
 		"vmid":       data.VMID,
 		"storage":    data.Storage,
+		"hostname":   data.Hostname,
 	}
 
 	path := "/nodes/" + data.Node + "/lxc"

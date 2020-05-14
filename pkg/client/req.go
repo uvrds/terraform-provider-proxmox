@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"sync"
 	"time"
 )
 
@@ -24,6 +25,7 @@ type API struct {
 	Auth bool
 
 	resp []byte
+	Cond *sync.Cond
 }
 
 func NewClient(baseURL string, username string, password string, insecure bool) *API {
@@ -39,6 +41,7 @@ func NewClient(baseURL string, username string, password string, insecure bool) 
 		Username: username,
 		Password: password,
 		Client:   &http.Client{Transport: tr},
+		Cond:     sync.NewCond(&sync.Mutex{}),
 	}
 
 }
