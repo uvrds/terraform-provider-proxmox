@@ -97,13 +97,16 @@ func (api *API) req(data Data) error {
 }
 
 func (api *API) get(path string, body map[string]string) error {
-	api.authenticate()
+	err := api.authenticate()
+	if err != nil {
+		return err
+	}
 	rq := Data{
 		Method: "GET",
 		Path:   path,
 		Body:   body,
 	}
-	err := api.req(rq)
+	err = api.req(rq)
 	if err != nil {
 		return err
 	}
@@ -111,13 +114,16 @@ func (api *API) get(path string, body map[string]string) error {
 }
 
 func (api *API) post(path string, body map[string]string) error {
-	api.authenticate()
+	err := api.authenticate()
+	if err != nil {
+		return err
+	}
 	rq := Data{
 		Method: "POST",
 		Path:   path,
 		Body:   body,
 	}
-	err := api.req(rq)
+	err = api.req(rq)
 	if err != nil {
 		return err
 	}
@@ -125,13 +131,16 @@ func (api *API) post(path string, body map[string]string) error {
 }
 
 func (api *API) put(path string, body map[string]string) error {
-	api.authenticate()
+	err := api.authenticate()
+	if err != nil {
+		return err
+	}
 	rq := Data{
 		Method: "PUT",
 		Path:   path,
 		Body:   body,
 	}
-	err := api.req(rq)
+	err = api.req(rq)
 	if err != nil {
 		return err
 	}
@@ -139,13 +148,16 @@ func (api *API) put(path string, body map[string]string) error {
 }
 
 func (api *API) del(path string, body map[string]string) error {
-	api.authenticate()
+	err := api.authenticate()
+	if err != nil {
+		return err
+	}
 	rq := Data{
 		Method: "DELETE",
 		Path:   path,
 		Body:   body,
 	}
-	err := api.req(rq)
+	err = api.req(rq)
 	if err != nil {
 		return err
 	}
