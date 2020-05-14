@@ -10,10 +10,30 @@ func resourceLxc() *schema.Resource {
 	fmt.Print()
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
-			"node": {
+			"name": {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "The name of lxc container",
+			},
+			"vmid": {
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "The id of lxc container",
+			},
+			"ostemplate": {
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "The id of lxc container",
+			},
+			"storage": {
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "The id of lxc container",
+			},
+			"node": {
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "The id of lxc container",
 			},
 		},
 		Create: resourceLxcCreate,
@@ -26,9 +46,15 @@ func resourceLxc() *schema.Resource {
 func resourceLxcCreate(d *schema.ResourceData, m interface{}) error {
 
 	apiClient := m.(*client.API)
-	node := d.Get("node").(string)
-	d.SetId(node)
-	err := apiClient.CreateLxc(node)
+	data := client.Lxc{
+		VMID:       d.Get("vmid").(string),
+		Ostemplate: d.Get("ostemplate").(string),
+		Storage:    d.Get("storage").(string),
+		Node:       d.Get("node").(string),
+		Name:       d.Get("name").(string),
+	}
+	d.SetId(d.Get("vmid").(string))
+	err := apiClient.CreateLxc(data)
 	if err != nil {
 		return err
 	}
