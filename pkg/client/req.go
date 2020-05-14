@@ -23,7 +23,7 @@ type API struct {
 
 	Auth bool
 
-	resp string
+	resp []byte
 }
 
 func NewClient(baseURL string, username string, password string, insecure bool) *API {
@@ -81,7 +81,7 @@ func (api *API) req(data Data) error {
 	}
 	defer resp.Body.Close()
 	content, err := ioutil.ReadAll(resp.Body)
-	api.resp = string(content)
+	api.resp = content
 	if err != nil {
 		return err
 	}

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/terraform-provider-proxmox/pkg/client"
+	"log"
 )
 
 func resourceLxc() *schema.Resource {
@@ -44,17 +45,28 @@ func resourceLxc() *schema.Resource {
 }
 
 func resourceLxcCreate(d *schema.ResourceData, m interface{}) error {
-
+	var err error
 	apiClient := m.(*client.API)
+	node := d.Get("node").(string)
+	if node == "" {
+
+	}
+	vmid := d.Get("vmid").(string)
+	if vmid == "" {
+		vmid, err = apiClient.NextId()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
 	data := client.Lxc{
-		VMID:       d.Get("vmid").(string),
+		VMID:       vmid,
 		Ostemplate: d.Get("ostemplate").(string),
 		Storage:    d.Get("storage").(string),
-		Node:       d.Get("node").(string),
+		Node:       node,
 		Name:       d.Get("name").(string),
 	}
 	d.SetId(d.Get("vmid").(string))
-	err := apiClient.CreateLxc(data)
+	err = apiClient.CreateLxc(data)
 	if err != nil {
 		return err
 	}

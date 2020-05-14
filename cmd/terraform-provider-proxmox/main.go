@@ -2,6 +2,7 @@ package main
 
 import (
 	log "github.com/sirupsen/logrus"
+	"github.com/terraform-provider-proxmox/pkg/client"
 	"os"
 )
 
@@ -19,13 +20,12 @@ func init() {
 
 func main() {
 
-	//BaseURL := "https://192.168.122.54:8006/api2/json"
-	//Username := "root@pam"
-	//Password := "asdqz123"
-	//
-	//
-	//t := client.NewClient(BaseURL, Username, Password, true)
-	//
-	//t.CreateLxc()
+	BaseURL := "https://192.168.122.54:8006/api2/json"
+	Username := "root@pam"
+	Password := "asdqz123"
+
+	t := client.NewClient(BaseURL, Username, Password, true)
+
+	t.NextId()
 
 }
