@@ -28,8 +28,7 @@ func resourceLxcCreate(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*client.API)
 	node := d.Get("node").(string)
 	d.SetId(node)
-	err := apiClient.Authenticate()
-	err = apiClient.CreateLxc(node)
+	err := apiClient.CreateLxc(node)
 	if err != nil {
 		return err
 	}

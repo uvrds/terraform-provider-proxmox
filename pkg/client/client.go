@@ -83,7 +83,6 @@ func (api *API) req(data Data) error {
 		return err
 	}
 	//TODO проверить на nil
-	fmt.Println(string(content))
 	if data.Path == "/access/ticket" {
 		var respCookie Cookie
 		err = json.Unmarshal(content, &respCookie)
@@ -97,7 +96,63 @@ func (api *API) req(data Data) error {
 	return nil
 }
 
-func (api *API) Authenticate() error {
+func (api *API) get(path string, body map[string]string) error {
+	api.authenticate()
+	rq := Data{
+		Method: "GET",
+		Path:   path,
+		Body:   body,
+	}
+	err := api.req(rq)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (api *API) post(path string, body map[string]string) error {
+	api.authenticate()
+	rq := Data{
+		Method: "POST",
+		Path:   path,
+		Body:   body,
+	}
+	err := api.req(rq)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (api *API) put(path string, body map[string]string) error {
+	api.authenticate()
+	rq := Data{
+		Method: "PUT",
+		Path:   path,
+		Body:   body,
+	}
+	err := api.req(rq)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (api *API) del(path string, body map[string]string) error {
+	api.authenticate()
+	rq := Data{
+		Method: "DELETE",
+		Path:   path,
+		Body:   body,
+	}
+	err := api.req(rq)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (api *API) authenticate() error {
 	options := map[string]string{"username": api.Username, "password": api.Password}
 
 	rq := Data{
@@ -115,12 +170,8 @@ func (api *API) Authenticate() error {
 }
 
 func (api *API) GetStatus(node string, id string) error {
-	rq := Data{
-		Method: "GET",
-		Path:   "/nodes/" + node + "/qemu/" + id + "/status/current",
-		Body:   nil,
-	}
-	err := api.req(rq)
+	path := "/nodes/" + node + "/qemu/" + id + "/status/current"
+	err := api.get(path, nil)
 	if err != nil {
 		return err
 	}
@@ -135,12 +186,8 @@ func (api *API) CreateLxc(node string) error {
 		"storage":    "local-lvm",
 	}
 
-	rq := Data{
-		Method: "POST",
-		Path:   "/nodes/" + node + "/lxc",
-		Body:   options,
-	}
-	err := api.req(rq)
+	path := "/nodes/" + node + "/lxc"
+	err := api.post(path, options)
 	if err != nil {
 		return err
 	}
