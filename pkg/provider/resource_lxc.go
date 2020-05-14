@@ -36,6 +36,16 @@ func resourceLxc() *schema.Resource {
 				Required:    true,
 				Description: "The id of lxc container",
 			},
+			"cores": {
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "The id of lxc container",
+			},
+			"memory": {
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "The id of lxc container",
+			},
 		},
 		Create: resourceLxcCreate,
 		Read:   resourceServerRead,
@@ -69,6 +79,8 @@ func resourceLxcCreate(d *schema.ResourceData, m interface{}) error {
 		Storage:    d.Get("storage").(string),
 		Node:       node,
 		Hostname:   d.Get("hostname").(string),
+		Cores:      d.Get("cores").(string),
+		Memory:     d.Get("memory").(string),
 	}
 	d.SetId(vmid)
 	err = apiClient.CreateLxc(data)
