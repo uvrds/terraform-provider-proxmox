@@ -65,7 +65,7 @@ func resourceLxcCreate(d *schema.ResourceData, m interface{}) error {
 		Node:       node,
 		Name:       d.Get("name").(string),
 	}
-	d.SetId(d.Get("vmid").(string))
+	d.SetId(vmid)
 	err = apiClient.CreateLxc(data)
 	if err != nil {
 		return err
