@@ -37,7 +37,7 @@ func main() {
 		TLSClientConfig:    &tls.Config{InsecureSkipVerify: true},
 	}
 	t.Client = &http.Client{Transport: tr}
-	//err = t.GetStatus("pve", "101")
-	err := t.CreateLxc("pve")
+	err := t.GetStatus("pve", "101")
+	err = t.CreateLxc("pve")
 	fmt.Println(err)
 }
