@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"sync"
 	"time"
 )
 
@@ -23,7 +24,8 @@ type API struct {
 
 	Auth bool
 
-	resp string
+	resp []byte
+	Cond *sync.Cond
 }
 
 func NewClient(baseURL string, username string, password string, insecure bool) *API {
@@ -39,6 +41,7 @@ func NewClient(baseURL string, username string, password string, insecure bool) 
 		Username: username,
 		Password: password,
 		Client:   &http.Client{Transport: tr},
+		Cond:     sync.NewCond(&sync.Mutex{}),
 	}
 
 }
@@ -81,7 +84,7 @@ func (api *API) req(data Data) error {
 	}
 	defer resp.Body.Close()
 	content, err := ioutil.ReadAll(resp.Body)
-	api.resp = string(content)
+	api.resp = content
 	if err != nil {
 		return err
 	}

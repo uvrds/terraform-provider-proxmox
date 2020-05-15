@@ -4,13 +4,14 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/terraform-provider-proxmox/pkg/client"
+	"log"
 )
 
 func resourceLxc() *schema.Resource {
 	fmt.Print()
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
-			"name": {
+			"hostname": {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "The name of lxc container",
@@ -35,6 +36,16 @@ func resourceLxc() *schema.Resource {
 				Required:    true,
 				Description: "The id of lxc container",
 			},
+			"cores": {
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "The id of lxc container",
+			},
+			"memory": {
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "The id of lxc container",
+			},
 		},
 		Create: resourceLxcCreate,
 		Read:   resourceServerRead,
@@ -44,21 +55,41 @@ func resourceLxc() *schema.Resource {
 }
 
 func resourceLxcCreate(d *schema.ResourceData, m interface{}) error {
+	var err error
 
 	apiClient := m.(*client.API)
+	apiClient.Cond.L.Lock()
+	node := d.Get("node").(string)
+	if node == "" {
+
+	}
+	vmid := d.Get("vmid").(string)
+	if vmid == "" {
+
+		vmid, err = apiClient.NextId()
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+	}
 	data := client.Lxc{
-		VMID:       d.Get("vmid").(string),
+		VMID:       vmid,
 		Ostemplate: d.Get("ostemplate").(string),
 		Storage:    d.Get("storage").(string),
-		Node:       d.Get("node").(string),
-		Name:       d.Get("name").(string),
+		Node:       node,
+		Hostname:   d.Get("hostname").(string),
+		Cores:      d.Get("cores").(string),
+		Memory:     d.Get("memory").(string),
 	}
-	d.SetId(d.Get("vmid").(string))
-	err := apiClient.CreateLxc(data)
+	d.SetId(vmid)
+	err = apiClient.CreateLxc(data)
 	if err != nil {
 		return err
 	}
+	apiClient.Cond.L.Unlock()
 	return resourceServerRead(d, m)
+
 }
 
 func resourceServerRead(d *schema.ResourceData, m interface{}) error {
