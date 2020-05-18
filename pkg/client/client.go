@@ -33,7 +33,6 @@ type Lxc struct {
 func (api *API) CreateLxc(data Lxc) error {
 
 	options := map[string]string{
-
 		"ostemplate":  data.Ostemplate,
 		"vmid":        data.VMID,
 		"storage":     data.Storage,
@@ -52,8 +51,7 @@ func (api *API) CreateLxc(data Lxc) error {
 }
 
 func (api *API) Delete_lxc(data Lxc) error {
-
-	path := "/nodes/" + data.Node + "/lxc/" + data.VMID
+	path := "/nodes/" + data.Node + "/lxc/" + data.VMID + "?purge=1"
 	err := api.del(path, nil)
 	if err != nil {
 		return err
@@ -75,6 +73,5 @@ func (api *API) NextId() (string, error) {
 	if err != nil {
 		return "", err
 	}
-
 	return id.Data, nil
 }

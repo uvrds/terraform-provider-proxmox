@@ -76,7 +76,7 @@ func (api *API) req(data Data) error {
 	} else {
 		body = nil
 	}
-	logger.Infof("%s Request to url: %s, body %s", data.Method, data.Path, data.Body)
+	logger.Infof("%s Request to url: %s, body %v", data.Method, data.Path, body)
 	req, err := http.NewRequest(data.Method, api.BaseURL+data.Path, body)
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Cookie", fmt.Sprintf("PVEAuthCookie=%s", api.ticket))
