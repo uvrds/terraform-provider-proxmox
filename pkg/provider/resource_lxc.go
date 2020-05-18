@@ -18,7 +18,7 @@ func resourceLxc() *schema.Resource {
 			},
 			"vmid": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				Description: "The id of lxc container",
 			},
 			"ostemplate": {
