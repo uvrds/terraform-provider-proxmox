@@ -12,8 +12,11 @@ func main() {
 	Password := "asdqz123"
 
 	t := client.NewClient(BaseURL, Username, Password, true)
-
-	_, err := t.NextId()
+	data := client.Lxc{
+		VMID: "100",
+		Node: "pve",
+	}
+	err := t.Delete_lxc(data)
 	if err != nil {
 		logger.Fatalf("%s", err)
 	}

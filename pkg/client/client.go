@@ -15,6 +15,10 @@ func (api *API) GetStatusVM(node string, id string) error {
 	return nil
 }
 
+type RespData struct {
+	Data string `json:"data"`
+}
+
 type Lxc struct {
 	VMID        string
 	Ostemplate  string
@@ -38,7 +42,6 @@ func (api *API) CreateLxc(data Lxc) error {
 		"memory":      data.Memory,
 		"description": data.Description,
 	}
-
 	path := "/nodes/" + data.Node + "/lxc"
 	err := api.post(path, options)
 	if err != nil {
@@ -48,8 +51,15 @@ func (api *API) CreateLxc(data Lxc) error {
 	return nil
 }
 
-type Id struct {
-	Data string `json:"data"`
+func (api *API) Delete_lxc(data Lxc) error {
+
+	path := "/nodes/" + data.Node + "/lxc/" + data.VMID
+	err := api.del(path, nil)
+	if err != nil {
+		return err
+	}
+	logger.Infof("delete lxc %s", string(api.resp))
+	return nil
 }
 
 func (api *API) NextId() (string, error) {
@@ -59,7 +69,7 @@ func (api *API) NextId() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	var id Id
+	var id RespData
 	err = json.Unmarshal(api.resp, &id)
 	logger.Infof("get id for vm %s", string(api.resp))
 	if err != nil {

@@ -107,5 +107,23 @@ func resourceServerUpdate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceServerDelete(d *schema.ResourceData, m interface{}) error {
+	var err error
+
+	apiClient := m.(*client.API)
+	apiClient.Cond.L.Lock()
+	node := d.Get("node").(string)
+	if node == "" {
+
+	}
+	data := client.Lxc{
+		VMID: d.Id(),
+		Node: node,
+	}
+	d.SetId(d.Id())
+	err = apiClient.Delete_lxc(data)
+	if err != nil {
+		return err
+	}
+	apiClient.Cond.L.Unlock()
 	return nil
 }

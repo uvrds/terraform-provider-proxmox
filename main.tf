@@ -1,6 +1,6 @@
 provider "proxmox" {
   #address proxmox
-  address = "https://92.168.122.54:8006/api2/json"
+  address = "https://192.168.122.54:8006/api2/json"
   #user and @ type auth (pve, pam, ldap)
   user = "root@pam"
   #TLS defaul false

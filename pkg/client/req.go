@@ -94,25 +94,7 @@ func (api *API) req(data Data) error {
 	if err != nil {
 		return err
 	}
-	var auth AuthNull
-	err = json.Unmarshal(content, &auth)
-	if err != nil {
-		return err
-	}
 
-	if auth.Data == nil {
-		logger.Fatalf("wrong login or password: %v", auth.Data)
-	}
-	if data.Path == "/access/ticket" {
-		var respCookie Cookie
-		err = json.Unmarshal(content, &respCookie)
-		if err != nil {
-			return err
-		}
-		api.csrfPreventionToken = respCookie.Data.CSRFPreventionToken
-		api.ticket = respCookie.Data.Ticket
-		api.Auth = true
-	}
 	return nil
 }
 
@@ -197,6 +179,24 @@ func (api *API) authenticate() error {
 		if err != nil {
 			return err
 		}
+		var respCookie Cookie
+		err = json.Unmarshal(api.resp, &respCookie)
+		if err != nil {
+			return err
+		}
+		api.csrfPreventionToken = respCookie.Data.CSRFPreventionToken
+		api.ticket = respCookie.Data.Ticket
+		api.Auth = true
+		var auth AuthNull
+		err = json.Unmarshal(api.resp, &auth)
+		if err != nil {
+			return err
+		}
+
+		if auth.Data == nil {
+			logger.Fatalf("wrong login or password: %v", auth.Data)
+		}
 	}
+
 	return nil
 }
