@@ -2,9 +2,9 @@ package provider
 
 import (
 	"fmt"
+	"github.com/VictoriaMetrics/VictoriaMetrics/lib/logger"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/terraform-provider-proxmox/pkg/client"
-	"log"
 )
 
 func resourceLxc() *schema.Resource {
@@ -24,12 +24,12 @@ func resourceLxc() *schema.Resource {
 			"ostemplate": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "The id of lxc container",
+				Description: "Template for lxc container",
 			},
 			"storage": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "The id of lxc container",
+				Description: "Storage lxc container",
 			},
 			"node": {
 				Type:        schema.TypeString,
@@ -42,6 +42,11 @@ func resourceLxc() *schema.Resource {
 				Description: "The id of lxc container",
 			},
 			"memory": {
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "The id of lxc container",
+			},
+			"description": {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "The id of lxc container",
@@ -67,20 +72,20 @@ func resourceLxcCreate(d *schema.ResourceData, m interface{}) error {
 	if vmid == "" {
 
 		vmid, err = apiClient.NextId()
-
 		if err != nil {
-			log.Fatal(err)
+			logger.Fatalf(" id not get %s", err)
 		}
 
 	}
 	data := client.Lxc{
-		VMID:       vmid,
-		Ostemplate: d.Get("ostemplate").(string),
-		Storage:    d.Get("storage").(string),
-		Node:       node,
-		Hostname:   d.Get("hostname").(string),
-		Cores:      d.Get("cores").(string),
-		Memory:     d.Get("memory").(string),
+		VMID:        vmid,
+		Ostemplate:  d.Get("ostemplate").(string),
+		Storage:     d.Get("storage").(string),
+		Node:        node,
+		Hostname:    d.Get("hostname").(string),
+		Cores:       d.Get("cores").(string),
+		Memory:      d.Get("memory").(string),
+		Description: d.Get("description").(string),
 	}
 	d.SetId(vmid)
 	err = apiClient.CreateLxc(data)

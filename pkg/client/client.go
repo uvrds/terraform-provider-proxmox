@@ -16,25 +16,27 @@ func (api *API) GetStatusVM(node string, id string) error {
 }
 
 type Lxc struct {
-	VMID       string
-	Ostemplate string
-	Storage    string
-	Node       string
-	Hostname   string
-	Cores      string
-	Memory     string
+	VMID        string
+	Ostemplate  string
+	Storage     string
+	Node        string
+	Hostname    string
+	Cores       string
+	Memory      string
+	Description string
 }
 
 func (api *API) CreateLxc(data Lxc) error {
 
 	options := map[string]string{
 
-		"ostemplate": data.Ostemplate,
-		"vmid":       data.VMID,
-		"storage":    data.Storage,
-		"hostname":   data.Hostname,
-		"cores":      data.Cores,
-		"memory":     data.Memory,
+		"ostemplate":  data.Ostemplate,
+		"vmid":        data.VMID,
+		"storage":     data.Storage,
+		"hostname":    data.Hostname,
+		"cores":       data.Cores,
+		"memory":      data.Memory,
+		"description": data.Description,
 	}
 
 	path := "/nodes/" + data.Node + "/lxc"
