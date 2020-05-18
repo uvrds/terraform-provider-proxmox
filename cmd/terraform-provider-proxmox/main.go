@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/VictoriaMetrics/VictoriaMetrics/lib/logger"
 	"github.com/terraform-provider-proxmox/pkg/client"
 )
 
@@ -12,6 +13,9 @@ func main() {
 
 	t := client.NewClient(BaseURL, Username, Password, true)
 
-	t.NextId()
+	_, err := t.NextId()
+	if err != nil {
+		logger.Fatalf("%s", err)
+	}
 
 }
