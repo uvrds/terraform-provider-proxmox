@@ -15,7 +15,7 @@ resource "proxmox_lxc" "test" {
   storage = "local-lvm"
   hostname = "kuber01"
   cores = "2"
-  memory = "1000"
+  memory = "1024" # 1024MB
   description = "test"
 }
 
