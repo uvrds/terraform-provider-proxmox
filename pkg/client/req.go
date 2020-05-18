@@ -61,6 +61,10 @@ type Cookie struct {
 	} `json:"data"`
 }
 
+type AuthNull struct {
+	Data interface{} `json:"data"`
+}
+
 func (api *API) req(data Data) error {
 	var body io.Reader
 	if data.Body != nil {
@@ -90,8 +94,15 @@ func (api *API) req(data Data) error {
 	if err != nil {
 		return err
 	}
+	var auth AuthNull
+	err = json.Unmarshal(content, &auth)
+	if err != nil {
+		return err
+	}
 
-	//TODO проверить на nil
+	if auth.Data == nil {
+		logger.Fatalf("wrong login or password: %v", auth.Data)
+	}
 	if data.Path == "/access/ticket" {
 		var respCookie Cookie
 		err = json.Unmarshal(content, &respCookie)

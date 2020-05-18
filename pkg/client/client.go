@@ -42,7 +42,7 @@ func (api *API) CreateLxc(data Lxc) error {
 	if err != nil {
 		return err
 	}
-	logger.Infof("create vm %s", string(api.resp))
+	logger.Infof("create lxc %s", string(api.resp))
 	return nil
 }
 
@@ -52,14 +52,14 @@ type Id struct {
 
 func (api *API) NextId() (string, error) {
 
-	path := "cluster/nextid"
+	path := "/cluster/nextid"
 	err := api.get(path, nil)
 	if err != nil {
 		return "", err
 	}
 	var id Id
 	err = json.Unmarshal(api.resp, &id)
-	logger.Infof("id for vm %s", string(api.resp))
+	logger.Infof("get id for vm %s", string(api.resp))
 	if err != nil {
 		return "", err
 	}
