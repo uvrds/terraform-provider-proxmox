@@ -2,9 +2,9 @@ package provider
 
 import (
 	"fmt"
+	"github.com/VictoriaMetrics/VictoriaMetrics/lib/logger"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/terraform-provider-proxmox/pkg/client"
-	"log"
 )
 
 func resourceLxc() *schema.Resource {
@@ -18,18 +18,18 @@ func resourceLxc() *schema.Resource {
 			},
 			"vmid": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				Description: "The id of lxc container",
 			},
 			"ostemplate": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "The id of lxc container",
+				Description: "Template for lxc container",
 			},
 			"storage": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "The id of lxc container",
+				Description: "Storage lxc container",
 			},
 			"node": {
 				Type:        schema.TypeString,
@@ -42,6 +42,11 @@ func resourceLxc() *schema.Resource {
 				Description: "The id of lxc container",
 			},
 			"memory": {
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "The id of lxc container",
+			},
+			"description": {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "The id of lxc container",
@@ -67,20 +72,20 @@ func resourceLxcCreate(d *schema.ResourceData, m interface{}) error {
 	if vmid == "" {
 
 		vmid, err = apiClient.NextId()
-
 		if err != nil {
-			log.Fatal(err)
+			logger.Fatalf(" id not get %s", err)
 		}
 
 	}
 	data := client.Lxc{
-		VMID:       vmid,
-		Ostemplate: d.Get("ostemplate").(string),
-		Storage:    d.Get("storage").(string),
-		Node:       node,
-		Hostname:   d.Get("hostname").(string),
-		Cores:      d.Get("cores").(string),
-		Memory:     d.Get("memory").(string),
+		VMID:        vmid,
+		Ostemplate:  d.Get("ostemplate").(string),
+		Storage:     d.Get("storage").(string),
+		Node:        node,
+		Hostname:    d.Get("hostname").(string),
+		Cores:       d.Get("cores").(string),
+		Memory:      d.Get("memory").(string),
+		Description: d.Get("description").(string),
 	}
 	d.SetId(vmid)
 	err = apiClient.CreateLxc(data)
@@ -97,10 +102,27 @@ func resourceServerRead(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceServerUpdate(d *schema.ResourceData, m interface{}) error {
-
 	return nil
 }
 
 func resourceServerDelete(d *schema.ResourceData, m interface{}) error {
+	var err error
+
+	apiClient := m.(*client.API)
+	apiClient.Cond.L.Lock()
+	node := d.Get("node").(string)
+	if node == "" {
+
+	}
+	data := client.Lxc{
+		VMID: d.Id(),
+		Node: node,
+	}
+	d.SetId(d.Id())
+	err = apiClient.Delete_lxc(data)
+	if err != nil {
+		return err
+	}
+	apiClient.Cond.L.Unlock()
 	return nil
 }

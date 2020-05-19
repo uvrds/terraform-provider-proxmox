@@ -5,6 +5,7 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
+	"github.com/VictoriaMetrics/VictoriaMetrics/lib/logger"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -60,6 +61,10 @@ type Cookie struct {
 	} `json:"data"`
 }
 
+type AuthNull struct {
+	Data interface{} `json:"data"`
+}
+
 func (api *API) req(data Data) error {
 	var body io.Reader
 	if data.Body != nil {
@@ -71,6 +76,7 @@ func (api *API) req(data Data) error {
 	} else {
 		body = nil
 	}
+	logger.Infof("%s Request to url: %s, body %v", data.Method, data.Path, body)
 	req, err := http.NewRequest(data.Method, api.BaseURL+data.Path, body)
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Cookie", fmt.Sprintf("PVEAuthCookie=%s", api.ticket))
@@ -89,17 +95,6 @@ func (api *API) req(data Data) error {
 		return err
 	}
 
-	//TODO проверить на nil
-	if data.Path == "/access/ticket" {
-		var respCookie Cookie
-		err = json.Unmarshal(content, &respCookie)
-		if err != nil {
-			return err
-		}
-		api.csrfPreventionToken = respCookie.Data.CSRFPreventionToken
-		api.ticket = respCookie.Data.Ticket
-		api.Auth = true
-	}
 	return nil
 }
 
@@ -184,6 +179,24 @@ func (api *API) authenticate() error {
 		if err != nil {
 			return err
 		}
+		var respCookie Cookie
+		err = json.Unmarshal(api.resp, &respCookie)
+		if err != nil {
+			return err
+		}
+		api.csrfPreventionToken = respCookie.Data.CSRFPreventionToken
+		api.ticket = respCookie.Data.Ticket
+		api.Auth = true
+		var auth AuthNull
+		err = json.Unmarshal(api.resp, &auth)
+		if err != nil {
+			return err
+		}
+
+		if auth.Data == nil {
+			logger.Fatalf("wrong login or password: %v", auth.Data)
+		}
 	}
+
 	return nil
 }

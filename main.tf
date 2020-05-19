@@ -11,11 +11,11 @@ provider "proxmox" {
 
 resource "proxmox_lxc" "test" {
   node = "pve"
-  vmid = ""
   ostemplate = "local:vztmpl/ubuntu-18.04-standard_18.04.1-1_amd64.tar.gz"
   storage = "local-lvm"
   hostname = "kuber01"
   cores = "2"
-  memory = "1000"
+  memory = "1024" # 1024MB
+  description = "test"
 }
 
