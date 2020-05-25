@@ -47,6 +47,14 @@ func (api *API) CreateLxc(data Lxc) error {
 		return err
 	}
 	logger.Infof("create lxc %s", string(api.resp))
+
+	path = "/nodes/" + data.Node + "/lxc/" + data.VMID + "/status/start"
+	err = api.post(path, nil)
+	if err != nil {
+		return err
+	}
+	logger.Infof("start lxc ok %s", string(api.resp))
+
 	return nil
 }
 

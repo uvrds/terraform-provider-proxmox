@@ -33,23 +33,28 @@ func resourceLxc() *schema.Resource {
 			},
 			"node": {
 				Type:        schema.TypeString,
-				Required:    true,
-				Description: "The id of lxc container",
+				Optional:    true,
+				Description: "The node of lxc container",
 			},
 			"cores": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "The id of lxc container",
+				Description: "The cores of lxc container",
 			},
 			"memory": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "The id of lxc container",
+				Description: "The memory of lxc container",
 			},
 			"description": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "The id of lxc container",
+				Description: "The description lxc container",
+			},
+			"purge": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Purge container",
 			},
 		},
 		Create: resourceLxcCreate,
@@ -106,6 +111,7 @@ func resourceServerUpdate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceServerDelete(d *schema.ResourceData, m interface{}) error {
+
 	var err error
 
 	apiClient := m.(*client.API)
@@ -114,6 +120,7 @@ func resourceServerDelete(d *schema.ResourceData, m interface{}) error {
 	if node == "" {
 
 	}
+
 	data := client.Lxc{
 		VMID: d.Id(),
 		Node: node,
