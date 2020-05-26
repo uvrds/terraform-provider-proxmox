@@ -103,6 +103,29 @@ func resourceLxcCreate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceServerRead(d *schema.ResourceData, m interface{}) error {
+
+	apiClient := m.(*client.API)
+	node, err := findlxc(apiClient)
+	if err != nil {
+		return err
+	}
+	data := client.Lxc{
+		VMID: d.Id(),
+		Node: node,
+	}
+
+	server, err := apiClient.LxcRead(data)
+	if err != nil {
+		return err
+	}
+	if err != nil {
+		logger.Warnf("lxc not found id: %s", d.Id())
+		d.SetId("")
+		return nil
+	}
+
+	d.Set("cores", server.Data.Cpus)
+
 	return nil
 }
 
@@ -132,4 +155,15 @@ func resourceServerDelete(d *schema.ResourceData, m interface{}) error {
 	}
 	apiClient.Cond.L.Unlock()
 	return nil
+}
+
+//help
+
+func findlxc(apiClient *client.API) (string, error) {
+
+	node, err := apiClient.GetNodes()
+	if err != nil {
+		return "", err
+	}
+	return node.Data[0].Node, err
 }
