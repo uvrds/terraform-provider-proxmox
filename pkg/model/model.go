@@ -1,8 +1,12 @@
 package model
 
-import "github.com/terraform-provider-proxmox/pkg/model/vmtype"
+//type virtualMachine struct {
+//	name   string
+//	vmType vmtype.Alias
+//}
 
-type virtualMachine struct {
-	name   string
-	vmType vmtype.Alias
+type ProviderConfig struct {
+	ipamEndpoints []string
+	ipamUsername  string
+	ipamPassword  string
 }
