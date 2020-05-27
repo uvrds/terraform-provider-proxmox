@@ -6,7 +6,7 @@ import (
 	"github.com/terraform-provider-proxmox/pkg/client"
 )
 
-func resourceLxc() *schema.Resource {
+func resourceLxcClone() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"hostname": {
@@ -19,7 +19,7 @@ func resourceLxc() *schema.Resource {
 				Optional:    true,
 				Description: "The id of lxc container",
 			},
-			"ostemplate": {
+			"vm_id_template": {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "Template for lxc container",
@@ -49,20 +49,15 @@ func resourceLxc() *schema.Resource {
 				Required:    true,
 				Description: "The description lxc container",
 			},
-			"purge": {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				Description: "Purge container",
-			},
 		},
-		Create: resourceLxcCreate,
-		Read:   resourceServerRead,
-		Update: resourceServerUpdate,
-		Delete: resourceServerDelete,
+		Create: resourceClone,
+		Read:   resourceCloneRead,
+		Update: resourceCloneUpdate,
+		Delete: resourceCloneDelete,
 	}
 }
 
-func resourceLxcCreate(d *schema.ResourceData, m interface{}) error {
+func resourceClone(d *schema.ResourceData, m interface{}) error {
 	var err error
 
 	apiClient := m.(*client.API)
@@ -100,34 +95,15 @@ func resourceLxcCreate(d *schema.ResourceData, m interface{}) error {
 
 }
 
-func resourceServerRead(d *schema.ResourceData, m interface{}) error {
+func resourceCloneRead(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func resourceServerUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceCloneUpdate(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func resourceServerDelete(d *schema.ResourceData, m interface{}) error {
+func resourceCloneDelete(d *schema.ResourceData, m interface{}) error {
 
-	var err error
-
-	apiClient := m.(*client.API)
-	apiClient.Cond.L.Lock()
-	node := d.Get("node").(string)
-	if node == "" {
-
-	}
-
-	data := client.Lxc{
-		VMID: d.Id(),
-		Node: node,
-	}
-	d.SetId(d.Id())
-	err = apiClient.Deletelxc(data)
-	if err != nil {
-		return err
-	}
-	apiClient.Cond.L.Unlock()
 	return nil
 }

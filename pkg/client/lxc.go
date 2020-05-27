@@ -82,7 +82,7 @@ func (api *API) CreateLxc(data Lxc) error {
 	return nil
 }
 
-func (api *API) Delete_lxc(data Lxc) error {
+func (api *API) Deletelxc(data Lxc) error {
 
 	path := "/nodes/" + data.Node + "/lxc/" + data.VMID + "/status/stop"
 	err := api.post(path, nil)
@@ -116,6 +116,56 @@ func (api *API) Delete_lxc(data Lxc) error {
 	return nil
 }
 
+type LxcClone struct {
+	VMID        string
+	NEWID       string
+	Storage     string
+	Node        string
+	Hostname    string
+	Description string
+	Full        string
+}
+
+func (api *API) CloneLxc(data LxcClone) error {
+
+	options := map[string]string{
+		"newid": data.NEWID,
+		"vmid":  data.VMID,
+	}
+	path := "/nodes/" + data.Node + "/lxc/" + data.NEWID + "/clone"
+	err := api.post(path, options)
+	if err != nil {
+		return err
+	}
+	logger.Infof("clone lxc %s", string(api.resp))
+
+	time.Sleep(time.Second * 2)
+
+	var st = true
+	for st {
+		path = "/nodes/" + data.Node + "/lxc/" + data.NEWID + "/status/start"
+		err = api.post(path, nil)
+		if err != nil {
+			return nil
+		}
+		resp, err := api.statusLXC(data.Node, data.VMID)
+		if err != nil {
+			return nil
+		}
+		var stat LxcStatus
+		err = json.Unmarshal(resp, &stat)
+		if err != nil {
+			return nil
+		}
+		if stat.Data.Status == "running" {
+			st = false
+			logger.Infof("start lxc ok %s", string(api.resp))
+		}
+		time.Sleep(time.Second * 2)
+	}
+	return nil
+}
+
 //common
 func (api *API) NextId() (string, error) {
 
@@ -131,22 +181,4 @@ func (api *API) NextId() (string, error) {
 		return "", err
 	}
 	return id.Data, nil
-}
-
-type Nodes struct {
-	Data []struct {
-		Maxmem         int64   `json:"maxmem"`
-		Mem            int     `json:"mem"`
-		Node           string  `json:"node"`
-		Maxcpu         int     `json:"maxcpu"`
-		Type           string  `json:"type"`
-		SslFingerprint string  `json:"ssl_fingerprint"`
-		Uptime         int     `json:"uptime"`
-		Disk           int64   `json:"disk"`
-		Status         string  `json:"status"`
-		ID             string  `json:"id"`
-		Maxdisk        int64   `json:"maxdisk"`
-		CPU            float64 `json:"cpu"`
-		Level          string  `json:"level"`
-	} `json:"data"`
 }
