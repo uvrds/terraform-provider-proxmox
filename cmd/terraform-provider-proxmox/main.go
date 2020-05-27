@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/terraform-provider-proxmox/pkg/client"
 )
 
@@ -22,10 +23,10 @@ func main() {
 	//	Memory:      "512",
 	//	Description: "client",
 	//}
-	//te, err := t.LxcRead(data)
+	//_, err := t.(data)
 	//if err != nil {
 	//	logger.Fatalf("%s", err)
 	//}
-
-	t.GetNodes()
+	fmt.Println(t)
+	//t.GetNodes()
 }

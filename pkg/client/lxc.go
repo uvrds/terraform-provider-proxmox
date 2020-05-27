@@ -26,47 +26,6 @@ func (api *API) statusLXC(node string, id string) ([]byte, error) {
 	return api.resp, nil
 }
 
-type ReadLxc struct {
-	Data struct {
-		Template  string  `json:"template"`
-		Cpus      int     `json:"cpus"`
-		Pid       string  `json:"pid"`
-		CPU       float64 `json:"cpu"`
-		Swap      int     `json:"swap"`
-		Status    string  `json:"status"`
-		Lock      string  `json:"lock"`
-		Diskwrite int     `json:"diskwrite"`
-		Maxmem    int     `json:"maxmem"`
-		Maxswap   int     `json:"maxswap"`
-		Disk      string  `json:"disk"`
-		Type      string  `json:"type"`
-		Ha        struct {
-			Managed int `json:"managed"`
-		} `json:"ha"`
-		Maxdisk  string `json:"maxdisk"`
-		Netout   int    `json:"netout"`
-		Diskread int    `json:"diskread"`
-		Name     string `json:"name"`
-		Netin    int    `json:"netin"`
-		Vmid     string `json:"vmid"`
-		Uptime   int    `json:"uptime"`
-		Mem      int    `json:"mem"`
-	} `json:"data"`
-}
-
-func (api *API) LxcRead(data Lxc) (ReadLxc, error) {
-	resp, err := api.statusLXC(data.Node, data.VMID)
-	if err != nil {
-		return ReadLxc{}, err
-	}
-	var read ReadLxc
-	err = json.Unmarshal(resp, &read)
-	if err != nil {
-		return ReadLxc{}, err
-	}
-	return read, nil
-}
-
 type Lxc struct {
 	VMID        string
 	Ostemplate  string
@@ -190,20 +149,4 @@ type Nodes struct {
 		CPU            float64 `json:"cpu"`
 		Level          string  `json:"level"`
 	} `json:"data"`
-}
-
-func (api *API) GetNodes() (Nodes, error) {
-
-	path := "/nodes"
-	err := api.get(path, nil)
-	if err != nil {
-		return Nodes{}, err
-	}
-	var node Nodes
-	err = json.Unmarshal(api.resp, &node)
-	logger.Infof("get nodes %s", string(api.resp))
-	if err != nil {
-		return Nodes{}, err
-	}
-	return node, nil
 }
