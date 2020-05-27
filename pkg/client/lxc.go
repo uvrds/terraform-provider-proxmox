@@ -121,6 +121,7 @@ type LxcClone struct {
 	NEWID       string
 	Storage     string
 	Node        string
+	TargetNode  string
 	Hostname    string
 	Description string
 	Full        string
@@ -129,10 +130,14 @@ type LxcClone struct {
 func (api *API) CloneLxc(data LxcClone) error {
 
 	options := map[string]string{
-		"newid": data.NEWID,
-		"vmid":  data.VMID,
+		"newid": data.Node,
+		//	"full":        data.Full,
+		"storage":     data.Storage,
+		"hostname":    data.Hostname,
+		"description": data.Description,
+		"target":      data.TargetNode,
 	}
-	path := "/nodes/" + data.Node + "/lxc/" + data.NEWID + "/clone"
+	path := "/nodes/" + data.Node + "/lxc/" + data.VMID + "/clone"
 	err := api.post(path, options)
 	if err != nil {
 		return err
@@ -140,29 +145,6 @@ func (api *API) CloneLxc(data LxcClone) error {
 	logger.Infof("clone lxc %s", string(api.resp))
 
 	time.Sleep(time.Second * 2)
-
-	var st = true
-	for st {
-		path = "/nodes/" + data.Node + "/lxc/" + data.NEWID + "/status/start"
-		err = api.post(path, nil)
-		if err != nil {
-			return nil
-		}
-		resp, err := api.statusLXC(data.Node, data.VMID)
-		if err != nil {
-			return nil
-		}
-		var stat LxcStatus
-		err = json.Unmarshal(resp, &stat)
-		if err != nil {
-			return nil
-		}
-		if stat.Data.Status == "running" {
-			st = false
-			logger.Infof("start lxc ok %s", string(api.resp))
-		}
-		time.Sleep(time.Second * 2)
-	}
 	return nil
 }
 

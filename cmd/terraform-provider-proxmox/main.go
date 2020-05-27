@@ -13,17 +13,18 @@ func main() {
 	Password := "asdqz123"
 
 	t := client.NewClient(BaseURL, Username, Password, true)
-	//id, err := t.NextId()
+	id, err := t.NextId()
 	data := client.LxcClone{
 		VMID:        "100",
-		NEWID:       "105",
+		NEWID:       id,
 		Storage:     "local-lvm",
 		Node:        "pve",
+		TargetNode:  "pve",
 		Hostname:    "kuber02",
 		Description: "213",
 		Full:        "1",
 	}
-	err := t.CloneLxc(data)
+	err = t.CloneLxc(data)
 	if err != nil {
 		logger.Fatalf("%s", err)
 	}
