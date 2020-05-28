@@ -10,9 +10,30 @@ type RespData struct {
 	Data string `json:"data"`
 }
 
-type LxcStatus struct {
+type StatusLXC struct {
 	Data struct {
-		Status string `json:"status"`
+		Netin     int    `json:"netin"`
+		Status    string `json:"status"`
+		Diskread  int    `json:"diskread"`
+		Diskwrite int    `json:"diskwrite"`
+		Maxswap   int    `json:"maxswap"`
+		Name      string `json:"name"`
+		Netout    int    `json:"netout"`
+		Template  string `json:"template"`
+		Ha        struct {
+			Managed int `json:"managed"`
+		} `json:"ha"`
+		Uptime  int    `json:"uptime"`
+		Mem     int    `json:"mem"`
+		Lock    string `json:"lock"`
+		CPU     int    `json:"cpu"`
+		Swap    int    `json:"swap"`
+		Maxmem  int    `json:"maxmem"`
+		Type    string `json:"type"`
+		Vmid    string `json:"vmid"`
+		Maxdisk int64  `json:"maxdisk"`
+		Cpus    int    `json:"cpus"`
+		Disk    int    `json:"disk"`
 	} `json:"data"`
 }
 
@@ -68,7 +89,7 @@ func (api *API) CreateLxc(data Lxc) error {
 		if err != nil {
 			return err
 		}
-		var stat LxcStatus
+		var stat StatusLXC
 		err = json.Unmarshal(resp, &stat)
 		if err != nil {
 			return err
@@ -95,7 +116,7 @@ func (api *API) Deletelxc(data Lxc) error {
 		if err != nil {
 			return err
 		}
-		var stat LxcStatus
+		var stat StatusLXC
 		err = json.Unmarshal(resp, &stat)
 		if err != nil {
 			return err

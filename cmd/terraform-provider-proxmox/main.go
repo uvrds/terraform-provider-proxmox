@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/VictoriaMetrics/VictoriaMetrics/lib/logger"
 	"github.com/terraform-provider-proxmox/pkg/client"
 )
@@ -13,21 +12,20 @@ func main() {
 	Password := "asdqz123"
 
 	t := client.NewClient(BaseURL, Username, Password, true)
-	//id, err := t.NextId()
-	//data := client.LxcClone{
-	//	VMID:        "100",
-	//	NEWID:       id,
-	//	Storage:     "local-lvm",
-	//	Node:        "pve",
-	//	TargetNode:  "pve",
-	//	Hostname:    "kuber02",
-	//	Description: "213",
-	//	Full:        "1",
-	//}
-	obj, err := t.NodeStatus("pve")
+	id, err := t.NextId()
+	data := client.Lxc{
+		VMID:        id,
+		Ostemplate:  "local:vztmpl/ubuntu-18.04-standard_18.04.1-1_amd64.tar.gz",
+		Storage:     "local-lvm",
+		Node:        "pve",
+		Hostname:    "test",
+		Cores:       "1",
+		Memory:      "512",
+		Description: "test",
+	}
+	t.CreateLxc(data)
 	if err != nil {
 		logger.Fatalf("%s", err)
 	}
-	fmt.Println(obj.Data)
-	//t.GetNodes()
+
 }
