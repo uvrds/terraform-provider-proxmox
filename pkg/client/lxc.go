@@ -82,13 +82,13 @@ func (api *API) CreateLxc(data Lxc) error {
 
 func (api *API) Deletelxc(data Lxc) error {
 	api.stopLxc(data)
+	time.Sleep(time.Second * 2)
 	path := "/nodes/" + data.Node + "/lxc/" + data.VMID + "?purge=1"
 	err := api.del(path, nil)
 	if err != nil {
 		return err
 	}
 	logger.Infof("delete lxc %s", string(api.resp))
-
 	return nil
 }
 
@@ -101,6 +101,8 @@ type LxcClone struct {
 	Hostname    string
 	Description string
 	Full        string
+	Cores       string
+	Memory      string
 }
 
 func (api *API) CloneLxc(data LxcClone) error {
@@ -149,14 +151,14 @@ func (api *API) startLxc(data Lxc) error {
 }
 
 func (api *API) stopLxc(data Lxc) error {
+	path := "/nodes/" + data.Node + "/lxc/" + data.VMID + "/status/stop"
+	err := api.post(path, nil)
+	if err != nil {
+		return err
+	}
+
 	var s = true
 	for s {
-
-		path := "/nodes/" + data.Node + "/lxc/" + data.VMID + "/status/stop"
-		err := api.post(path, nil)
-		if err != nil {
-			return err
-		}
 
 		resp, err := api.statusLXC(data.Node, data.VMID)
 		if err != nil {
@@ -171,7 +173,6 @@ func (api *API) stopLxc(data Lxc) error {
 			logger.Infof("stop lxc %s", string(api.resp))
 			s = false
 		}
-		time.Sleep(time.Second * 5)
 	}
 	return nil
 }
