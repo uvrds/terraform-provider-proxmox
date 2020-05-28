@@ -1,7 +1,6 @@
 package provider
 
 import (
-	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/netbox-community/go-netbox/netbox/client/ipam"
 )
@@ -22,7 +21,7 @@ func dataSourceIPAMPrefixesRead(d *schema.ResourceData, meta interface{}) error 
 	res, err := c.Ipam.IpamPrefixesList(par, nil)
 
 	if err == nil {
-		fmt.Printf("PREFIXES COUNT %d", res.Payload.Count)
+		d.Set("prefixes_count", res.Payload.Count)
 	} else {
 		return err
 	}
@@ -31,8 +30,22 @@ func dataSourceIPAMPrefixesRead(d *schema.ResourceData, meta interface{}) error 
 
 }
 
-func dataSourcePrefixesSchema() map[string]*schema.Schema {
+func barePrefixesSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"prefixes_count": {Type: schema.TypeInt},
 	}
+}
+
+func dataSourcePrefixesSchema() map[string]*schema.Schema {
+	s := barePrefixesSchema()
+
+	for k, v := range s {
+		switch k {
+		case "prefixes_count":
+			v.Optional = true
+
+		}
+	}
+
+	return s
 }
