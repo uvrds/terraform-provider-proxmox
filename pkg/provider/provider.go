@@ -17,7 +17,7 @@ func Provider() terraform.ResourceProvider {
 func providerSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"ipam_address": {
-			Type:        schema.TypeList,
+			Type:        schema.TypeString,
 			Required:    true,
 			Description: "Hostname of IPAM service",
 		},
