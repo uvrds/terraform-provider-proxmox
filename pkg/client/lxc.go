@@ -23,17 +23,17 @@ type StatusLXC struct {
 		Ha        struct {
 			Managed int `json:"managed"`
 		} `json:"ha"`
-		Uptime  int    `json:"uptime"`
-		Mem     int    `json:"mem"`
-		Lock    string `json:"lock"`
-		CPU     int    `json:"cpu"`
-		Swap    int    `json:"swap"`
-		Maxmem  int    `json:"maxmem"`
-		Type    string `json:"type"`
-		Vmid    string `json:"vmid"`
-		Maxdisk int64  `json:"maxdisk"`
-		Cpus    int    `json:"cpus"`
-		Disk    int    `json:"disk"`
+		Uptime  int         `json:"uptime"`
+		Mem     int         `json:"mem"`
+		Lock    string      `json:"lock"`
+		CPU     int         `json:"cpu"`
+		Swap    int         `json:"swap"`
+		Maxmem  int         `json:"maxmem"`
+		Type    string      `json:"type"`
+		Vmid    string      `json:"vmid"`
+		Maxdisk interface{} `json:"maxdisk"`
+		Cpus    int         `json:"cpus"`
+		Disk    interface{} `json:"disk"`
 	} `json:"data"`
 }
 
@@ -75,31 +75,6 @@ func (api *API) CreateLxc(data Lxc) error {
 		return err
 	}
 	logger.Infof("create lxc %s", string(api.resp))
-
-	time.Sleep(time.Second * 2)
-
-	path = "/nodes/" + data.Node + "/lxc/" + data.VMID + "/status/start"
-	err = api.post(path, nil)
-	if err != nil {
-		return err
-	}
-	var st = true
-	for st {
-		resp, err := api.statusLXC(data.Node, data.VMID)
-		if err != nil {
-			return err
-		}
-		var stat StatusLXC
-		err = json.Unmarshal(resp, &stat)
-		if err != nil {
-			return err
-		}
-		if stat.Data.Status == "running" {
-			st = false
-			logger.Infof("start lxc ok %s", string(api.resp))
-		}
-
-	}
 	return nil
 }
 
