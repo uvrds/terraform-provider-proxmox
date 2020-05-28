@@ -76,12 +76,12 @@ func (api *API) CreateLxc(data Lxc) error {
 	}
 	logger.Infof("create lxc %s", string(api.resp))
 
-	api.startLxc(data)
+	api.startLxc(data.Node, data.VMID)
 	return nil
 }
 
 func (api *API) Deletelxc(data Lxc) error {
-	api.stopLxc(data)
+	api.stopLxc(data.Node, data.VMID)
 	time.Sleep(time.Second * 2)
 	path := "/nodes/" + data.Node + "/lxc/" + data.VMID + "?purge=1"
 	err := api.del(path, nil)
@@ -121,18 +121,18 @@ func (api *API) CloneLxc(data LxcClone) error {
 		return err
 	}
 	logger.Infof("clone lxc %s", string(api.resp))
-
+	api.startLxc(data.Node, data.NEWID)
 	return nil
 }
 
-func (api *API) startLxc(data Lxc) error {
+func (api *API) startLxc(node string, vmid string) error {
 	for i := 0; i <= 2; i++ {
-		path := "/nodes/" + data.Node + "/lxc/" + data.VMID + "/status/start"
+		path := "/nodes/" + node + "/lxc/" + vmid + "/status/start"
 		err := api.post(path, nil)
 		if err != nil {
 			return err
 		}
-		resp, err := api.statusLXC(data.Node, data.VMID)
+		resp, err := api.statusLXC(node, vmid)
 		if err != nil {
 			return err
 		}
@@ -142,7 +142,7 @@ func (api *API) startLxc(data Lxc) error {
 			return err
 		}
 		if stat.Data.Status == "running" {
-			logger.Infof("start lxc ok id:%s %s", data.VMID, string(api.resp))
+			logger.Infof("start lxc ok id:%s %s", vmid, string(api.resp))
 			i = 3
 		}
 		time.Sleep(time.Second * 2)
@@ -150,8 +150,8 @@ func (api *API) startLxc(data Lxc) error {
 	return nil
 }
 
-func (api *API) stopLxc(data Lxc) error {
-	path := "/nodes/" + data.Node + "/lxc/" + data.VMID + "/status/stop"
+func (api *API) stopLxc(node string, vmid string) error {
+	path := "/nodes/" + node + "/lxc/" + vmid + "/status/stop"
 	err := api.post(path, nil)
 	if err != nil {
 		return err
@@ -160,7 +160,7 @@ func (api *API) stopLxc(data Lxc) error {
 	var s = true
 	for s {
 
-		resp, err := api.statusLXC(data.Node, data.VMID)
+		resp, err := api.statusLXC(node, vmid)
 		if err != nil {
 			return err
 		}
@@ -170,7 +170,7 @@ func (api *API) stopLxc(data Lxc) error {
 			return err
 		}
 		if stat.Data.Status == "stopped" {
-			logger.Infof("stop lxc %s", string(api.resp))
+			logger.Infof("stop lxc id:%s %s", vmid, string(api.resp))
 			s = false
 		}
 	}
