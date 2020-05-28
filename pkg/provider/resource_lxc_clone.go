@@ -19,6 +19,11 @@ func resourceLxcClone() *schema.Resource {
 				Optional:    true,
 				Description: "The id of lxc container",
 			},
+			"taget_node": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The full copy storage",
+			},
 			"vm_id_template": {
 				Type:        schema.TypeString,
 				Required:    true,
@@ -49,6 +54,11 @@ func resourceLxcClone() *schema.Resource {
 				Required:    true,
 				Description: "The description lxc container",
 			},
+			"full": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "The full copy storage",
+			},
 		},
 		Create: resourceClone,
 		Read:   resourceCloneRead,
@@ -66,32 +76,45 @@ func resourceClone(d *schema.ResourceData, m interface{}) error {
 	if node == "" {
 
 	}
+	targetNode := d.Get("taget_node").(string)
+	if targetNode == "" {
+
+	}
 	vmid := d.Get("vmid").(string)
 	if vmid == "" {
-
 		vmid, err = apiClient.NextId()
 		if err != nil {
 			logger.Fatalf(" id not get %s", err)
 		}
 
 	}
-	data := client.Lxc{
-		VMID:        vmid,
-		Ostemplate:  d.Get("ostemplate").(string),
+	var full string
+	f := d.Get("full").(bool)
+	if f {
+		full = "1"
+	} else {
+		full = "0"
+	}
+
+	data := client.LxcClone{
+		VMID:        d.Get("vm_id_template").(string),
+		NEWID:       vmid,
 		Storage:     d.Get("storage").(string),
 		Node:        node,
+		TargetNode:  targetNode,
 		Hostname:    d.Get("hostname").(string),
+		Description: d.Get("description").(string),
+		Full:        full,
 		Cores:       d.Get("cores").(string),
 		Memory:      d.Get("memory").(string),
-		Description: d.Get("description").(string),
 	}
 	d.SetId(vmid)
-	err = apiClient.CreateLxc(data)
+	err = apiClient.CloneLxc(data)
 	if err != nil {
 		return err
 	}
 	apiClient.Cond.L.Unlock()
-	return resourceServerRead(d, m)
+	return resourceCloneRead(d, m)
 
 }
 
@@ -104,6 +127,24 @@ func resourceCloneUpdate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceCloneDelete(d *schema.ResourceData, m interface{}) error {
+	var err error
 
+	apiClient := m.(*client.API)
+	apiClient.Cond.L.Lock()
+	node := d.Get("node").(string)
+	if node == "" {
+
+	}
+
+	data := client.Lxc{
+		VMID: d.Id(),
+		Node: node,
+	}
+	d.SetId(d.Id())
+	err = apiClient.Deletelxc(data)
+	if err != nil {
+		return err
+	}
+	apiClient.Cond.L.Unlock()
 	return nil
 }
