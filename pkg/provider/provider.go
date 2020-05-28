@@ -29,7 +29,7 @@ func providerSchema() map[string]*schema.Schema {
 
 func providerResources() map[string]*schema.Resource {
 	return map[string]*schema.Resource{
-		"ipam_prefixes": resourceIPAMPrefixes(),
+		"proxmox_ipam_prefixes": resourceIPAMPrefixes(),
 	}
 }
 
