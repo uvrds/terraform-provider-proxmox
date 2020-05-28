@@ -34,9 +34,9 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	return config.Client()
 }
 
-func getProviderConfig(dirty_config *schema.ResourceData) *Config {
+func getProviderConfig(dirtyConfig *schema.ResourceData) *Config {
 	return &Config{
-		IPAMEndpoint: dirty_config.Get("ipam_address").(string),
-		IPAMToken:    dirty_config.Get("ipam_token").(string),
+		IPAMEndpoint: dirtyConfig.Get("ipam_address").(string),
+		IPAMToken:    dirtyConfig.Get("ipam_token").(string),
 	}
 }
