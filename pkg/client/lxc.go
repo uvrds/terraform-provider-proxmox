@@ -130,8 +130,8 @@ type LxcClone struct {
 func (api *API) CloneLxc(data LxcClone) error {
 
 	options := map[string]string{
-		"newid": data.Node,
-		//	"full":        data.Full,
+		"newid":       data.NEWID,
+		"full":        data.Full,
 		"storage":     data.Storage,
 		"hostname":    data.Hostname,
 		"description": data.Description,
@@ -146,21 +146,4 @@ func (api *API) CloneLxc(data LxcClone) error {
 
 	time.Sleep(time.Second * 2)
 	return nil
-}
-
-//common
-func (api *API) NextId() (string, error) {
-
-	path := "/cluster/nextid"
-	err := api.get(path, nil)
-	if err != nil {
-		return "", err
-	}
-	var id RespData
-	err = json.Unmarshal(api.resp, &id)
-	logger.Infof("get id for vm %s", string(api.resp))
-	if err != nil {
-		return "", err
-	}
-	return id.Data, nil
 }
