@@ -3,41 +3,53 @@ package provider
 import (
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/terraform"
-	"github.com/terraform-provider-proxmox/pkg/client"
 )
 
 func Provider() terraform.ResourceProvider {
 	return &schema.Provider{
-		Schema: map[string]*schema.Schema{
-			"address": {
-				Type:     schema.TypeString,
-				Required: true,
-			},
-			"user": {
-				Type:     schema.TypeString,
-				Required: true,
-			},
-			"password": {
-				Type:     schema.TypeString,
-				Required: true,
-			},
-			"insecure": {
-				Type:     schema.TypeBool,
-				Required: true,
-			},
+		Schema:         providerSchema(),
+		DataSourcesMap: providerDataSourcesMap(),
+		ResourcesMap:   providerResources(),
+		ConfigureFunc:  providerConfigure,
+	}
+}
+
+func providerSchema() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		"ipam_address": {
+			Type:        schema.TypeString,
+			Required:    true,
+			Description: "Hostname of IPAM service",
 		},
-		ResourcesMap: map[string]*schema.Resource{
-			"proxmox_lxc":       resourceLxc(),
-			"proxmox_lxc_clone": resourceLxcClone(),
+
+		"ipam_token": {
+			Type:        schema.TypeString,
+			Required:    true,
+			Description: "Token for IPAM connections",
 		},
-		ConfigureFunc: providerConfigure,
+	}
+}
+
+func providerDataSourcesMap() map[string]*schema.Resource {
+	return map[string]*schema.Resource{
+		"proxmox_ipam_prefixes": dataSourceIPAMPrefixes(),
+	}
+}
+
+func providerResources() map[string]*schema.Resource {
+	return map[string]*schema.Resource{
+		"proxmox_ipam_prefixes": resourceIPAMPrefixes(),
 	}
 }
 
 func providerConfigure(d *schema.ResourceData) (interface{}, error) {
-	address := d.Get("address").(string)
-	user := d.Get("user").(string)
-	password := d.Get("password").(string)
-	ins := d.Get("insecure").(bool)
-	return client.NewClient(address, user, password, ins), nil
+	config := getProviderConfig(d)
+	return config.Client()
+}
+
+func getProviderConfig(dirtyConfig *schema.ResourceData) *Config {
+	return &Config{
+		IPAMEndpoint: dirtyConfig.Get("ipam_address").(string),
+		IPAMToken:    dirtyConfig.Get("ipam_token").(string),
+	}
 }
