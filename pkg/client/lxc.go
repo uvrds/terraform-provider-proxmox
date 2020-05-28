@@ -75,40 +75,20 @@ func (api *API) CreateLxc(data Lxc) error {
 		return err
 	}
 	logger.Infof("create lxc %s", string(api.resp))
+
+	api.startLxc(data)
 	return nil
 }
 
 func (api *API) Deletelxc(data Lxc) error {
-
-	path := "/nodes/" + data.Node + "/lxc/" + data.VMID + "/status/stop"
-	err := api.post(path, nil)
-	if err != nil {
-		return err
-	}
-	var st = true
-	for st {
-		resp, err := api.statusLXC(data.Node, data.VMID)
-		if err != nil {
-			return err
-		}
-		var stat StatusLXC
-		err = json.Unmarshal(resp, &stat)
-		if err != nil {
-			return err
-		}
-		if stat.Data.Status == "stopped" {
-			st = false
-		}
-		//time.Sleep(time.Second * 2)
-	}
-	logger.Infof("stop lxc %s", string(api.resp))
-
-	path = "/nodes/" + data.Node + "/lxc/" + data.VMID + "?purge=1"
-	err = api.del(path, nil)
+	api.stopLxc(data)
+	path := "/nodes/" + data.Node + "/lxc/" + data.VMID + "?purge=1"
+	err := api.del(path, nil)
 	if err != nil {
 		return err
 	}
 	logger.Infof("delete lxc %s", string(api.resp))
+
 	return nil
 }
 
@@ -140,28 +120,58 @@ func (api *API) CloneLxc(data LxcClone) error {
 	}
 	logger.Infof("clone lxc %s", string(api.resp))
 
-	time.Sleep(time.Second * 2)
 	return nil
 }
 
 func (api *API) startLxc(data Lxc) error {
+	for i := 0; i <= 2; i++ {
+		path := "/nodes/" + data.Node + "/lxc/" + data.VMID + "/status/start"
+		err := api.post(path, nil)
+		if err != nil {
+			return err
+		}
+		resp, err := api.statusLXC(data.Node, data.VMID)
+		if err != nil {
+			return err
+		}
+		var stat StatusLXC
+		err = json.Unmarshal(resp, &stat)
+		if err != nil {
+			return err
+		}
+		if stat.Data.Status == "running" {
+			logger.Infof("start lxc ok id:%s %s", data.VMID, string(api.resp))
+			i = 3
+		}
+		time.Sleep(time.Second * 2)
+	}
+	return nil
+}
 
-	path := "/nodes/" + data.Node + "/lxc/" + data.VMID + "/status/start"
-	err := api.post(path, nil)
-	if err != nil {
-		return err
-	}
-	resp, err := api.statusLXC(data.Node, data.VMID)
-	if err != nil {
-		return err
-	}
-	var stat StatusLXC
-	err = json.Unmarshal(resp, &stat)
-	if err != nil {
-		return err
-	}
-	if stat.Data.Status == "running" {
-		logger.Infof("start lxc ok id:%s %s", data.VMID, string(api.resp))
+func (api *API) stopLxc(data Lxc) error {
+	var s = true
+	for s {
+
+		path := "/nodes/" + data.Node + "/lxc/" + data.VMID + "/status/stop"
+		err := api.post(path, nil)
+		if err != nil {
+			return err
+		}
+
+		resp, err := api.statusLXC(data.Node, data.VMID)
+		if err != nil {
+			return err
+		}
+		var stat StatusLXC
+		err = json.Unmarshal(resp, &stat)
+		if err != nil {
+			return err
+		}
+		if stat.Data.Status == "stopped" {
+			logger.Infof("stop lxc %s", string(api.resp))
+			s = false
+		}
+		time.Sleep(time.Second * 5)
 	}
 	return nil
 }

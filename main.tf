@@ -15,7 +15,7 @@ resource "proxmox_lxc" "test" {
   storage = "local-lvm"
   hostname = "kuber01"
   cores = "1"
-  memory = "1024" # 1024MB
+  memory = "512" # 1024MB
   description = "test"
 }
 
@@ -25,7 +25,7 @@ resource "proxmox_lxc" "test1" {
   storage = "local-lvm"
   hostname = "kuber01"
   cores = "1"
-  memory = "1024" # 1024MB
+  memory = "512" # 1024MB
   description = "test"
 }
 
@@ -35,6 +35,27 @@ resource "proxmox_lxc" "test2" {
   storage = "local-lvm"
   hostname = "kuber01"
   cores = "1"
-  memory = "1024" # 1024MB
+  memory = "512" # 1024MB
+  description = "test"
+
+}
+
+resource "proxmox_lxc" "test4" {
+  node = "pve"
+  ostemplate = "local:vztmpl/ubuntu-18.04-standard_18.04.1-1_amd64.tar.gz"
+  storage = "local-lvm"
+  hostname = "kuber01"
+  cores = "1"
+  memory = "512" # 1024MB
+  description = "test"
+}
+
+resource "proxmox_lxc" "test5" {
+  node = "pve"
+  ostemplate = "local:vztmpl/ubuntu-18.04-standard_18.04.1-1_amd64.tar.gz"
+  storage = "local-lvm"
+  hostname = "kuber01"
+  cores = "1"
+  memory = "512" # 1024MB
   description = "test"
 }

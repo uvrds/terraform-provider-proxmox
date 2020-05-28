@@ -91,7 +91,7 @@ func resourceClone(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 	apiClient.Cond.L.Unlock()
-	return resourceServerRead(d, m)
+	return resourceCloneRead(d, m)
 
 }
 
