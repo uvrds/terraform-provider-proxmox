@@ -9,7 +9,7 @@ func Provider() terraform.ResourceProvider {
 	return &schema.Provider{
 		Schema: providerSchema(),
 		//DataSourcesMap: providerDataSourcesMap(),
-		//ResourcesMap:   providerResourcesMap(),
+		ResourcesMap:  providerResources(),
 		ConfigureFunc: providerConfigure,
 	}
 }
@@ -26,8 +26,11 @@ func providerSchema() map[string]*schema.Schema {
 //func providerDataSourcesMap() map[string]*schema.Resource {
 //}
 
-//func providerResourcesMap() map[string]*schema.Resource {
-//}
+func providerResources() map[string]*schema.Resource {
+	return map[string]*schema.Resource{
+		"ipam_prefixes": resourceIPAMPrefixes(),
+	}
+}
 
 func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	config := getProviderConfig(d)
