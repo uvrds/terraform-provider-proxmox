@@ -7,10 +7,10 @@ import (
 
 func Provider() terraform.ResourceProvider {
 	return &schema.Provider{
-		Schema: providerSchema(),
-		//DataSourcesMap: providerDataSourcesMap(),
-		ResourcesMap:  providerResources(),
-		ConfigureFunc: providerConfigure,
+		Schema:         providerSchema(),
+		DataSourcesMap: providerDataSourcesMap(),
+		ResourcesMap:   providerResources(),
+		ConfigureFunc:  providerConfigure,
 	}
 }
 
@@ -21,11 +21,20 @@ func providerSchema() map[string]*schema.Schema {
 			Required:    true,
 			Description: "Hostname of IPAM service",
 		},
+
+		"ipam_token": {
+			Type:        schema.TypeString,
+			Required:    true,
+			Description: "Token for IPAM connections",
+		},
 	}
 }
 
-//func providerDataSourcesMap() map[string]*schema.Resource {
-//}
+func providerDataSourcesMap() map[string]*schema.Resource {
+	return map[string]*schema.Resource{
+		"proxmox_ipam_prefixes": dataSourceIPAMPrefixes(),
+	}
+}
 
 func providerResources() map[string]*schema.Resource {
 	return map[string]*schema.Resource{
