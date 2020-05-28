@@ -6,7 +6,7 @@ import (
 	"github.com/terraform-provider-proxmox/pkg/client"
 )
 
-func resourceLxc() *schema.Resource {
+func resourceLxcClone() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"hostname": {
@@ -19,7 +19,12 @@ func resourceLxc() *schema.Resource {
 				Optional:    true,
 				Description: "The id of lxc container",
 			},
-			"ostemplate": {
+			"taget_node": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The full copy storage",
+			},
+			"vm_id_template": {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "Template for lxc container",
@@ -49,20 +54,20 @@ func resourceLxc() *schema.Resource {
 				Required:    true,
 				Description: "The description lxc container",
 			},
-			"purge": {
+			"full": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Description: "Purge container",
+				Description: "The full copy storage",
 			},
 		},
-		Create: resourceLxcCreate,
-		Read:   resourceServerRead,
-		Update: resourceServerUpdate,
-		Delete: resourceServerDelete,
+		Create: resourceClone,
+		Read:   resourceCloneRead,
+		Update: resourceCloneUpdate,
+		Delete: resourceCloneDelete,
 	}
 }
 
-func resourceLxcCreate(d *schema.ResourceData, m interface{}) error {
+func resourceClone(d *schema.ResourceData, m interface{}) error {
 	var err error
 
 	apiClient := m.(*client.API)
@@ -71,45 +76,57 @@ func resourceLxcCreate(d *schema.ResourceData, m interface{}) error {
 	if node == "" {
 
 	}
+	targetNode := d.Get("taget_node").(string)
+	if targetNode == "" {
+
+	}
 	vmid := d.Get("vmid").(string)
 	if vmid == "" {
-
 		vmid, err = apiClient.NextId()
 		if err != nil {
 			logger.Fatalf(" id not get %s", err)
 		}
 
 	}
-	data := client.Lxc{
-		VMID:        vmid,
-		Ostemplate:  d.Get("ostemplate").(string),
+	var full string
+	f := d.Get("full").(bool)
+	if f {
+		full = "1"
+	} else {
+		full = "0"
+	}
+
+	data := client.LxcClone{
+		VMID:        d.Get("vm_id_template").(string),
+		NEWID:       vmid,
 		Storage:     d.Get("storage").(string),
 		Node:        node,
+		TargetNode:  targetNode,
 		Hostname:    d.Get("hostname").(string),
+		Description: d.Get("description").(string),
+		Full:        full,
 		Cores:       d.Get("cores").(string),
 		Memory:      d.Get("memory").(string),
-		Description: d.Get("description").(string),
 	}
 	d.SetId(vmid)
-	err = apiClient.CreateLxc(data)
+	err = apiClient.CloneLxc(data)
 	if err != nil {
 		return err
 	}
 	apiClient.Cond.L.Unlock()
-	return resourceServerRead(d, m)
+	return resourceCloneRead(d, m)
 
 }
 
-func resourceServerRead(d *schema.ResourceData, m interface{}) error {
+func resourceCloneRead(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func resourceServerUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceCloneUpdate(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func resourceServerDelete(d *schema.ResourceData, m interface{}) error {
-
+func resourceCloneDelete(d *schema.ResourceData, m interface{}) error {
 	var err error
 
 	apiClient := m.(*client.API)

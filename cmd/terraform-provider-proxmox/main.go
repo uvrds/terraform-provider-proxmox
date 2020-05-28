@@ -12,11 +12,18 @@ func main() {
 	Password := "asdqz123"
 
 	t := client.NewClient(BaseURL, Username, Password, true)
+	id, err := t.NextId()
 	data := client.Lxc{
-		VMID: "100",
-		Node: "pve",
+		VMID:        id,
+		Ostemplate:  "local:vztmpl/ubuntu-18.04-standard_18.04.1-1_amd64.tar.gz",
+		Storage:     "local-lvm",
+		Node:        "pve",
+		Hostname:    "test",
+		Cores:       "1",
+		Memory:      "512",
+		Description: "test",
 	}
-	err := t.Delete_lxc(data)
+	t.CreateLxc(data)
 	if err != nil {
 		logger.Fatalf("%s", err)
 	}
