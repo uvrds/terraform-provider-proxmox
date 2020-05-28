@@ -168,3 +168,25 @@ func (api *API) CloneLxc(data LxcClone) error {
 	time.Sleep(time.Second * 2)
 	return nil
 }
+
+func (api *API) startLxc(data Lxc) error {
+
+	path := "/nodes/" + data.Node + "/lxc/" + data.VMID + "/status/start"
+	err := api.post(path, nil)
+	if err != nil {
+		return err
+	}
+	resp, err := api.statusLXC(data.Node, data.VMID)
+	if err != nil {
+		return err
+	}
+	var stat StatusLXC
+	err = json.Unmarshal(resp, &stat)
+	if err != nil {
+		return err
+	}
+	if stat.Data.Status == "running" {
+		logger.Infof("start lxc ok id:%s %s", data.VMID, string(api.resp))
+	}
+	return nil
+}
