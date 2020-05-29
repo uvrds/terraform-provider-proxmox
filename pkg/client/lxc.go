@@ -56,6 +56,8 @@ type Lxc struct {
 	Cores       string
 	Memory      string
 	Description string
+	Start       string
+	Password    string
 }
 
 func (api *API) CreateLxc(data Lxc) error {
@@ -68,6 +70,8 @@ func (api *API) CreateLxc(data Lxc) error {
 		"cores":       data.Cores,
 		"memory":      data.Memory,
 		"description": data.Description,
+		"start":       data.Start,
+		"password":    data.Password,
 	}
 	path := "/nodes/" + data.Node + "/lxc"
 	err := api.post(path, options)
@@ -75,13 +79,10 @@ func (api *API) CreateLxc(data Lxc) error {
 		return err
 	}
 	logger.Infof("create lxc %s", string(api.resp))
-
-	api.startLxc(data.Node, data.VMID)
 	return nil
 }
 
 func (api *API) Deletelxc(data Lxc) error {
-	api.stopLxc(data.Node, data.VMID)
 	time.Sleep(time.Second * 2)
 	path := "/nodes/" + data.Node + "/lxc/" + data.VMID + "?purge=1"
 	err := api.del(path, nil)

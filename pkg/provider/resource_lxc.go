@@ -49,10 +49,15 @@ func resourceLxc() *schema.Resource {
 				Required:    true,
 				Description: "The description lxc container",
 			},
-			"purge": {
+			"password": {
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "The password root",
+			},
+			"start": {
 				Type:        schema.TypeBool,
-				Optional:    true,
-				Description: "Purge container",
+				Required:    true,
+				Description: "The start of lxc container",
 			},
 		},
 		Create: resourceLxcCreate,
@@ -73,12 +78,17 @@ func resourceLxcCreate(d *schema.ResourceData, m interface{}) error {
 	}
 	vmid := d.Get("vmid").(string)
 	if vmid == "" {
-
 		vmid, err = apiClient.NextId()
 		if err != nil {
 			logger.Fatalf(" id not get %s", err)
 		}
-
+	}
+	var start string
+	f := d.Get("start").(bool)
+	if f {
+		start = "1"
+	} else {
+		start = "0"
 	}
 	data := client.Lxc{
 		VMID:        vmid,
@@ -89,6 +99,8 @@ func resourceLxcCreate(d *schema.ResourceData, m interface{}) error {
 		Cores:       d.Get("cores").(string),
 		Memory:      d.Get("memory").(string),
 		Description: d.Get("description").(string),
+		Start:       start,
+		Password:    d.Get("password").(string),
 	}
 	d.SetId(vmid)
 	err = apiClient.CreateLxc(data)
@@ -118,7 +130,6 @@ func resourceServerDelete(d *schema.ResourceData, m interface{}) error {
 	if node == "" {
 
 	}
-
 	data := client.Lxc{
 		VMID: d.Id(),
 		Node: node,
