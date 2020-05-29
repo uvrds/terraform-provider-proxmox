@@ -126,6 +126,7 @@ func resourceServerDelete(d *schema.ResourceData, m interface{}) error {
 
 	apiClient := m.(*Client).proxmox
 	apiClient.Cond.L.Lock()
+
 	node := d.Get("node").(string)
 	if node == "" {
 

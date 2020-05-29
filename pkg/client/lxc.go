@@ -26,7 +26,7 @@ type StatusLXC struct {
 		Uptime  int         `json:"uptime"`
 		Mem     int         `json:"mem"`
 		Lock    string      `json:"lock"`
-		CPU     int         `json:"cpu"`
+		CPU     interface{} `json:"cpu"`
 		Swap    int         `json:"swap"`
 		Maxmem  int         `json:"maxmem"`
 		Type    string      `json:"type"`
@@ -61,7 +61,8 @@ type Lxc struct {
 }
 
 func (api *API) CreateLxc(data Lxc) error {
-
+	//todo возомжно надо отлавливать ошибку о том что не создался lxc и пробывать снова создать. вместо sleep
+	time.Sleep(time.Second * 2)
 	options := map[string]string{
 		"ostemplate":  data.Ostemplate,
 		"vmid":        data.VMID,
@@ -83,15 +84,82 @@ func (api *API) CreateLxc(data Lxc) error {
 }
 
 func (api *API) Deletelxc(data Lxc) error {
-	api.stopLxc(data.Node, data.VMID)
-	time.Sleep(time.Second * 2)
-	path := "/nodes/" + data.Node + "/lxc/" + data.VMID + "?force=1"
-	err := api.del(path, nil)
+	err := api.stopLxc(data.Node, data.VMID)
 	if err != nil {
 		return err
 	}
-	logger.Infof("delete lxc %s", string(api.resp))
+	var s = true
+	for s {
+		path := "/nodes/" + data.Node + "/lxc/" + data.VMID + "?purge=1"
+		err = api.del(path, nil)
+		if err != nil {
+			return err
+		}
+		b, err := api.сheckLxc(data.Node, data.VMID)
+		if err != nil {
+			return err
+		}
+		if b {
+			s = false
+		}
+	}
+	logger.Infof("delete lxc %s", data.VMID)
 	return nil
+}
+
+func (api *API) stopLxc(node string, vmid string) error {
+	path := "/nodes/" + node + "/lxc/" + vmid + "/status/stop"
+	err := api.post(path, nil)
+	if err != nil {
+		return err
+	}
+	var s = true
+
+	for s {
+		b, err := api.сheckLxc(node, vmid)
+		if err != nil {
+			return err
+		}
+		if b {
+			s = false
+		}
+		resp, err := api.statusLXC(node, vmid)
+		if err != nil {
+			return err
+		}
+		var stat StatusLXC
+		err = json.Unmarshal(resp, &stat)
+		if err != nil {
+			return err
+		}
+		if stat.Data.Status == "stopped" {
+			logger.Infof("stop lxc id:%s %s", vmid, string(api.resp))
+			s = false
+		}
+	}
+	return nil
+}
+
+type CheckLxc struct {
+	Data interface{} `json:"data"`
+}
+
+func (api *API) сheckLxc(node string, vmid string) (bool, error) {
+	resp, err := api.statusLXC(node, vmid)
+	if err != nil {
+		return false, err
+	}
+	var stat CheckLxc
+	err = json.Unmarshal(resp, &stat)
+	if err != nil {
+		return false, err
+	}
+	if stat.Data == nil {
+		logger.Infof(" no found lxc id:%s", vmid)
+		return true, nil
+	}
+
+	return false, nil
 }
 
 type LxcClone struct {
@@ -123,32 +191,5 @@ func (api *API) CloneLxc(data LxcClone) error {
 		return err
 	}
 	logger.Infof("clone lxc %s", string(api.resp))
-	return nil
-}
-
-func (api *API) stopLxc(node string, vmid string) error {
-	path := "/nodes/" + node + "/lxc/" + vmid + "/status/stop"
-	err := api.post(path, nil)
-	if err != nil {
-		return err
-	}
-
-	var s = true
-	for s {
-		resp, err := api.statusLXC(node, vmid)
-		if err != nil {
-			return err
-		}
-		var stat StatusLXC
-		err = json.Unmarshal(resp, &stat)
-		if err != nil {
-			return err
-		}
-		if stat.Data.Status == "stopped" {
-			logger.Infof("stop lxc id:%s %s", vmid, string(api.resp))
-			s = false
-		}
-		time.Sleep(time.Second * 2)
-	}
 	return nil
 }
