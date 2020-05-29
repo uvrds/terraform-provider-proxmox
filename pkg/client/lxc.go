@@ -83,8 +83,9 @@ func (api *API) CreateLxc(data Lxc) error {
 }
 
 func (api *API) Deletelxc(data Lxc) error {
+	api.stopLxc(data.Node, data.VMID)
 	time.Sleep(time.Second * 2)
-	path := "/nodes/" + data.Node + "/lxc/" + data.VMID + "?purge=1"
+	path := "/nodes/" + data.Node + "/lxc/" + data.VMID + "?force=1"
 	err := api.del(path, nil)
 	if err != nil {
 		return err
@@ -134,7 +135,6 @@ func (api *API) stopLxc(node string, vmid string) error {
 
 	var s = true
 	for s {
-
 		resp, err := api.statusLXC(node, vmid)
 		if err != nil {
 			return err
@@ -148,6 +148,7 @@ func (api *API) stopLxc(node string, vmid string) error {
 			logger.Infof("stop lxc id:%s %s", vmid, string(api.resp))
 			s = false
 		}
+		time.Sleep(time.Second * 2)
 	}
 	return nil
 }
