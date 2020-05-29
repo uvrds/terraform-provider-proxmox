@@ -8,7 +8,6 @@ provider "proxmox" {
   password = "asdqz123"
 }
 
-//
 resource "proxmox_lxc" "test" {
   node = "pve"
   ostemplate = "local:vztmpl/ubuntu-18.04-standard_18.04.1-1_amd64.tar.gz"
