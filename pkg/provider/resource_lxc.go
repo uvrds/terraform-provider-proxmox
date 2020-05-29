@@ -49,11 +49,6 @@ func resourceLxc() *schema.Resource {
 				Required:    true,
 				Description: "The description lxc container",
 			},
-			"purge": {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				Description: "Purge container",
-			},
 		},
 		Create: resourceLxcCreate,
 		Read:   resourceServerRead,
@@ -63,6 +58,7 @@ func resourceLxc() *schema.Resource {
 }
 
 func resourceLxcCreate(d *schema.ResourceData, m interface{}) error {
+	//todo сделать валидацию ресурсов.
 	var err error
 
 	apiClient := m.(*client.API)
