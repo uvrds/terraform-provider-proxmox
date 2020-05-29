@@ -122,32 +122,6 @@ func (api *API) CloneLxc(data LxcClone) error {
 		return err
 	}
 	logger.Infof("clone lxc %s", string(api.resp))
-	api.startLxc(data.Node, data.NEWID)
-	return nil
-}
-
-func (api *API) startLxc(node string, vmid string) error {
-	for i := 0; i <= 2; i++ {
-		path := "/nodes/" + node + "/lxc/" + vmid + "/status/start"
-		err := api.post(path, nil)
-		if err != nil {
-			return err
-		}
-		resp, err := api.statusLXC(node, vmid)
-		if err != nil {
-			return err
-		}
-		var stat StatusLXC
-		err = json.Unmarshal(resp, &stat)
-		if err != nil {
-			return err
-		}
-		if stat.Data.Status == "running" {
-			logger.Infof("start lxc ok id:%s %s", vmid, string(api.resp))
-			i = 3
-		}
-		time.Sleep(time.Second * 2)
-	}
 	return nil
 }
 

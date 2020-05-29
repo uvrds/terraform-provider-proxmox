@@ -17,7 +17,7 @@ resource "proxmox_lxc" "test" {
   memory = "512" # 1024MB
   description = "test"
   password = "asdqz123"
-  start = true
+  start = true #старт машины при создании
 }
 
 //resource "proxmox_lxc_clone" "test" {
