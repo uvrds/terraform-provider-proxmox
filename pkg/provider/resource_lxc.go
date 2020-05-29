@@ -65,7 +65,7 @@ func resourceLxc() *schema.Resource {
 func resourceLxcCreate(d *schema.ResourceData, m interface{}) error {
 	var err error
 
-	apiClient := m.(*client.API)
+	apiClient := m.(*Client).proxmox
 	apiClient.Cond.L.Lock()
 	node := d.Get("node").(string)
 	if node == "" {
@@ -112,7 +112,7 @@ func resourceServerDelete(d *schema.ResourceData, m interface{}) error {
 
 	var err error
 
-	apiClient := m.(*client.API)
+	apiClient := m.(*Client).proxmox
 	apiClient.Cond.L.Lock()
 	node := d.Get("node").(string)
 	if node == "" {

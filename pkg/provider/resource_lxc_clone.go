@@ -70,7 +70,7 @@ func resourceLxcClone() *schema.Resource {
 func resourceClone(d *schema.ResourceData, m interface{}) error {
 	var err error
 
-	apiClient := m.(*client.API)
+	apiClient := m.(*Client).proxmox
 	apiClient.Cond.L.Lock()
 	node := d.Get("node").(string)
 	if node == "" {
@@ -129,7 +129,7 @@ func resourceCloneUpdate(d *schema.ResourceData, m interface{}) error {
 func resourceCloneDelete(d *schema.ResourceData, m interface{}) error {
 	var err error
 
-	apiClient := m.(*client.API)
+	apiClient := m.(*Client).proxmox
 	apiClient.Cond.L.Lock()
 	node := d.Get("node").(string)
 	if node == "" {
