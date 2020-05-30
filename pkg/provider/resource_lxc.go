@@ -120,21 +120,29 @@ func resourceServerRead(d *schema.ResourceData, m interface{}) error {
 	if node == "" {
 
 	}
-	resp, err := apiClient.StatusLXC(node, d.Id())
+	resp, err := apiClient.ConfigLXC(node, d.Id())
 	if err != nil {
 		return err
 	}
-	var stat client.StatusLXC
+	var stat client.ConfigLXC
 	err = json.Unmarshal(resp, &stat)
 	if err != nil {
 		return err
 	}
 
-	err = d.Set("hostname", stat.Data.Name)
+	err = d.Set("hostname", stat.Data.Hostname)
 	if err != nil {
 		return err
 	}
-	err = d.Set("cores", stat.Data.Cpus)
+	err = d.Set("cores", stat.Data.Cores)
+	if err != nil {
+		return err
+	}
+	err = d.Set("memory", stat.Data.Memory)
+	if err != nil {
+		return err
+	}
+	err = d.Set("description", stat.Data.Description)
 	if err != nil {
 		return err
 	}

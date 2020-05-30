@@ -22,5 +22,5 @@ func main() {
 	//	Memory:      "512",
 	//	Description: "test",
 	//}
-	t.StatusLXC("pve", "100")
+	t.ConfigLXC("pve", "100")
 }

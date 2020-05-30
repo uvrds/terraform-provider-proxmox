@@ -43,7 +43,7 @@ func (api *API) StatusLXC(node string, id string) ([]byte, error) {
 	if err != nil {
 		return api.resp, err
 	}
-	logger.Infof("status vm %s", string(api.resp))
+	logger.Infof("status lxc %s", string(api.resp))
 	return api.resp, nil
 }
 
@@ -192,4 +192,28 @@ func (api *API) CloneLxc(data LxcClone) error {
 	}
 	logger.Infof("clone lxc %s", string(api.resp))
 	return nil
+}
+
+type ConfigLXC struct {
+	Data struct {
+		Rootfs      string `json:"rootfs"`
+		Swap        int    `json:"swap"`
+		Description string `json:"description"`
+		Cores       int    `json:"cores"`
+		Hostname    string `json:"hostname"`
+		Digest      string `json:"digest"`
+		Ostype      string `json:"ostype"`
+		Arch        string `json:"arch"`
+		Memory      int    `json:"memory"`
+	} `json:"data"`
+}
+
+func (api *API) ConfigLXC(node string, id string) ([]byte, error) {
+	path := "/nodes/" + node + "/lxc/" + id + "/config"
+	err := api.get(path, nil)
+	if err != nil {
+		return api.resp, err
+	}
+	logger.Infof("config lxc %s", string(api.resp))
+	return api.resp, nil
 }
