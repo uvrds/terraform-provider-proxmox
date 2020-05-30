@@ -217,3 +217,29 @@ func (api *API) ConfigLXC(node string, id string) ([]byte, error) {
 	logger.Infof("config lxc %s", string(api.resp))
 	return api.resp, nil
 }
+
+type ConfigLXCUpdate struct {
+	VMID        string
+	Node        string
+	Hostname    string
+	Description string
+	Cores       string
+	Memory      string
+}
+
+func (api *API) ConfigLXCUpdate(data ConfigLXCUpdate) error {
+	options := map[string]string{
+		"hostname":    data.Hostname,
+		"cores":       data.Cores,
+		"memory":      data.Memory,
+		"description": data.Description,
+	}
+
+	path := "/nodes/" + data.Node + "/lxc/" + data.VMID + "/config"
+	err := api.put(path, options)
+	if err != nil {
+		return err
+	}
+	logger.Infof("config lxc update %s", string(api.resp))
+	return nil
+}

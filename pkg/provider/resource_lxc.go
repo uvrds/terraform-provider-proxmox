@@ -5,6 +5,7 @@ import (
 	"github.com/VictoriaMetrics/VictoriaMetrics/lib/logger"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/terraform-provider-proxmox/pkg/client"
+	"strconv"
 )
 
 func resourceLxc() *schema.Resource {
@@ -134,11 +135,13 @@ func resourceServerRead(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		return err
 	}
-	err = d.Set("cores", stat.Data.Cores)
+	coresStr := strconv.Itoa(stat.Data.Cores)
+	err = d.Set("cores", coresStr)
 	if err != nil {
 		return err
 	}
-	err = d.Set("memory", stat.Data.Memory)
+	memStr := strconv.Itoa(stat.Data.Memory)
+	err = d.Set("memory", memStr)
 	if err != nil {
 		return err
 	}
@@ -151,6 +154,28 @@ func resourceServerRead(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceServerUpdate(d *schema.ResourceData, m interface{}) error {
+	//todo неработает
+	var err error
+
+	apiClient := m.(*Client).proxmox
+	apiClient.Cond.L.Lock()
+	node := d.Get("node").(string)
+	if node == "" {
+
+	}
+	data := client.ConfigLXCUpdate{
+		VMID:        d.Get("vmid").(string),
+		Node:        node,
+		Hostname:    d.Get("hostname").(string),
+		Cores:       d.Get("cores").(string),
+		Memory:      d.Get("memory").(string),
+		Description: d.Get("description").(string),
+	}
+	err = apiClient.ConfigLXCUpdate(data)
+	if err != nil {
+		return err
+	}
+	apiClient.Cond.L.Unlock()
 	return resourceServerRead(d, m)
 }
 
