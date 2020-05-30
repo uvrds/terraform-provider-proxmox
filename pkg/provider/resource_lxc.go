@@ -134,6 +134,10 @@ func resourceServerRead(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		return err
 	}
+	err = d.Set("cores", stat.Data.Cpus)
+	if err != nil {
+		return err
+	}
 	apiClient.Cond.L.Unlock()
 	return nil
 }
