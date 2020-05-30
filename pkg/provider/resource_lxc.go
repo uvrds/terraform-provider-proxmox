@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"encoding/json"
 	"github.com/VictoriaMetrics/VictoriaMetrics/lib/logger"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/terraform-provider-proxmox/pkg/client"
@@ -113,11 +114,32 @@ func resourceLxcCreate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceServerRead(d *schema.ResourceData, m interface{}) error {
+	apiClient := m.(*Client).proxmox
+	apiClient.Cond.L.Lock()
+	node := d.Get("node").(string)
+	if node == "" {
+
+	}
+	resp, err := apiClient.StatusLXC(node, d.Id())
+	if err != nil {
+		return err
+	}
+	var stat client.StatusLXC
+	err = json.Unmarshal(resp, &stat)
+	if err != nil {
+		return err
+	}
+
+	err = d.Set("hostname", stat.Data.Name)
+	if err != nil {
+		return err
+	}
+	apiClient.Cond.L.Unlock()
 	return nil
 }
 
 func resourceServerUpdate(d *schema.ResourceData, m interface{}) error {
-	return nil
+	return resourceServerRead(d, m)
 }
 
 func resourceServerDelete(d *schema.ResourceData, m interface{}) error {

@@ -18,7 +18,7 @@ resource "proxmox_lxc" "test" {
   description = "test"
   password = "asdqz123"
   start = true #старт машины при создании
-  count = 10
+//  count = 10
 }
 
 //resource "proxmox_lxc_clone" "test" {

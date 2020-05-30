@@ -12,15 +12,15 @@ func main() {
 
 	t := client.NewClient(BaseURL, Username, Password, true)
 	//	id, err := t.NextId()
-	data := client.Lxc{
-		VMID:        "100",
-		Ostemplate:  "local:vztmpl/ubuntu-18.04-standard_18.04.1-1_amd64.tar.gz",
-		Storage:     "local-lvm",
-		Node:        "pve",
-		Hostname:    "test",
-		Cores:       "1",
-		Memory:      "512",
-		Description: "test",
-	}
-	t.Deletelxc(data)
+	//data := client.Lxc{
+	//	VMID:        "100",
+	//	Ostemplate:  "local:vztmpl/ubuntu-18.04-standard_18.04.1-1_amd64.tar.gz",
+	//	Storage:     "local-lvm",
+	//	Node:        "pve",
+	//	Hostname:    "test",
+	//	Cores:       "1",
+	//	Memory:      "512",
+	//	Description: "test",
+	//}
+	t.StatusLXC("pve", "100")
 }
