@@ -37,7 +37,7 @@ type StatusLXC struct {
 	} `json:"data"`
 }
 
-func (api *API) statusLXC(node string, id string) ([]byte, error) {
+func (api *API) StatusLXC(node string, id string) ([]byte, error) {
 	path := "/nodes/" + node + "/lxc/" + id + "/status/current"
 	err := api.get(path, nil)
 	if err != nil {
@@ -123,7 +123,7 @@ func (api *API) stopLxc(node string, vmid string) error {
 		if b {
 			s = false
 		}
-		resp, err := api.statusLXC(node, vmid)
+		resp, err := api.StatusLXC(node, vmid)
 		if err != nil {
 			return err
 		}
@@ -145,7 +145,7 @@ type CheckLxc struct {
 }
 
 func (api *API) сheckLxc(node string, vmid string) (bool, error) {
-	resp, err := api.statusLXC(node, vmid)
+	resp, err := api.StatusLXC(node, vmid)
 	if err != nil {
 		return false, err
 	}
