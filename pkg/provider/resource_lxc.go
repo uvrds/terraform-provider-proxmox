@@ -5,6 +5,7 @@ import (
 	"github.com/VictoriaMetrics/VictoriaMetrics/lib/logger"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/terraform-provider-proxmox/pkg/client"
+	"strconv"
 )
 
 func resourceLxc() *schema.Resource {
@@ -45,6 +46,11 @@ func resourceLxc() *schema.Resource {
 				Required:    true,
 				Description: "The memory of lxc container",
 			},
+			"swap": {
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "The swap of lxc container",
+			},
 			"description": {
 				Type:        schema.TypeString,
 				Required:    true,
@@ -62,9 +68,9 @@ func resourceLxc() *schema.Resource {
 			},
 		},
 		Create: resourceLxcCreate,
-		Read:   resourceServerRead,
-		Update: resourceServerUpdate,
-		Delete: resourceServerDelete,
+		Read:   resourceLxcRead,
+		Update: resourceLxcUpdate,
+		Delete: resourceLxcDelete,
 	}
 }
 
@@ -102,6 +108,7 @@ func resourceLxcCreate(d *schema.ResourceData, m interface{}) error {
 		Description: d.Get("description").(string),
 		Start:       start,
 		Password:    d.Get("password").(string),
+		Swap:        d.Get("swap").(string),
 	}
 	d.SetId(vmid)
 	err = apiClient.CreateLxc(data)
@@ -109,28 +116,47 @@ func resourceLxcCreate(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 	apiClient.Cond.L.Unlock()
-	return resourceServerRead(d, m)
+	return resourceLxcRead(d, m)
 
 }
 
-func resourceServerRead(d *schema.ResourceData, m interface{}) error {
+func resourceLxcRead(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*Client).proxmox
 	apiClient.Cond.L.Lock()
 	node := d.Get("node").(string)
 	if node == "" {
 
 	}
-	resp, err := apiClient.StatusLXC(node, d.Id())
+	resp, err := apiClient.ConfigLXC(node, d.Id())
 	if err != nil {
 		return err
 	}
-	var stat client.StatusLXC
+	var stat client.ConfigLXC
 	err = json.Unmarshal(resp, &stat)
 	if err != nil {
 		return err
 	}
 
-	err = d.Set("hostname", stat.Data.Name)
+	err = d.Set("hostname", stat.Data.Hostname)
+	if err != nil {
+		return err
+	}
+	coresStr := strconv.Itoa(stat.Data.Cores)
+	err = d.Set("cores", coresStr)
+	if err != nil {
+		return err
+	}
+	memStr := strconv.Itoa(stat.Data.Memory)
+	err = d.Set("memory", memStr)
+	if err != nil {
+		return err
+	}
+	swapStr := strconv.Itoa(stat.Data.Swap)
+	err = d.Set("swap", swapStr)
+	if err != nil {
+		return err
+	}
+	err = d.Set("description", stat.Data.Description)
 	if err != nil {
 		return err
 	}
@@ -138,11 +164,33 @@ func resourceServerRead(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func resourceServerUpdate(d *schema.ResourceData, m interface{}) error {
-	return resourceServerRead(d, m)
+func resourceLxcUpdate(d *schema.ResourceData, m interface{}) error {
+	var err error
+
+	apiClient := m.(*Client).proxmox
+	apiClient.Cond.L.Lock()
+	node := d.Get("node").(string)
+	if node == "" {
+
+	}
+	data := client.ConfigLXCUpdate{
+		VMID:        d.Get("vmid").(string),
+		Node:        node,
+		Hostname:    d.Get("hostname").(string),
+		Cores:       d.Get("cores").(string),
+		Memory:      d.Get("memory").(string),
+		Description: d.Get("description").(string),
+		Swap:        d.Get("swap").(string),
+	}
+	err = apiClient.ConfigLXCUpdate(data)
+	if err != nil {
+		return err
+	}
+	apiClient.Cond.L.Unlock()
+	return resourceLxcRead(d, m)
 }
 
-func resourceServerDelete(d *schema.ResourceData, m interface{}) error {
+func resourceLxcDelete(d *schema.ResourceData, m interface{}) error {
 
 	var err error
 

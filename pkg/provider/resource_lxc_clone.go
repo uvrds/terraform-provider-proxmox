@@ -60,14 +60,14 @@ func resourceLxcClone() *schema.Resource {
 				Description: "The full copy storage",
 			},
 		},
-		Create: resourceClone,
-		Read:   resourceCloneRead,
-		Update: resourceCloneUpdate,
-		Delete: resourceCloneDelete,
+		Create: resourceCloneCreate,
+		Read:   resourceLxcRead,
+		Update: resourceLxcUpdate,
+		Delete: resourceLxcDelete,
 	}
 }
 
-func resourceClone(d *schema.ResourceData, m interface{}) error {
+func resourceCloneCreate(d *schema.ResourceData, m interface{}) error {
 	var err error
 
 	apiClient := m.(*Client).proxmox
@@ -114,37 +114,5 @@ func resourceClone(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 	apiClient.Cond.L.Unlock()
-	return resourceCloneRead(d, m)
-
-}
-
-func resourceCloneRead(d *schema.ResourceData, m interface{}) error {
-	return nil
-}
-
-func resourceCloneUpdate(d *schema.ResourceData, m interface{}) error {
-	return nil
-}
-
-func resourceCloneDelete(d *schema.ResourceData, m interface{}) error {
-	var err error
-
-	apiClient := m.(*Client).proxmox
-	apiClient.Cond.L.Lock()
-	node := d.Get("node").(string)
-	if node == "" {
-
-	}
-
-	data := client.Lxc{
-		VMID: d.Id(),
-		Node: node,
-	}
-	d.SetId(d.Id())
-	err = apiClient.Deletelxc(data)
-	if err != nil {
-		return err
-	}
-	apiClient.Cond.L.Unlock()
-	return nil
+	return resourceLxcRead(d, m)
 }

@@ -15,9 +15,10 @@ resource "proxmox_lxc" "test" {
   hostname = "kuber01"
   cores = "1"
   memory = "512" # 1024MB
-  description = "test"
+  description = "test2"
   password = "asdqz123"
   start = true #старт машины при создании
+  swap = "0"
 //  count = 10
 }
 

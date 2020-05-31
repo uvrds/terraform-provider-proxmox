@@ -43,7 +43,7 @@ func (api *API) StatusLXC(node string, id string) ([]byte, error) {
 	if err != nil {
 		return api.resp, err
 	}
-	logger.Infof("status vm %s", string(api.resp))
+	logger.Infof("status lxc %s", string(api.resp))
 	return api.resp, nil
 }
 
@@ -58,6 +58,7 @@ type Lxc struct {
 	Description string
 	Start       string
 	Password    string
+	Swap        string
 }
 
 func (api *API) CreateLxc(data Lxc) error {
@@ -73,6 +74,7 @@ func (api *API) CreateLxc(data Lxc) error {
 		"description": data.Description,
 		"start":       data.Start,
 		"password":    data.Password,
+		"swap":        data.Swap,
 	}
 	path := "/nodes/" + data.Node + "/lxc"
 	err := api.post(path, options)
@@ -191,5 +193,55 @@ func (api *API) CloneLxc(data LxcClone) error {
 		return err
 	}
 	logger.Infof("clone lxc %s", string(api.resp))
+	return nil
+}
+
+type ConfigLXC struct {
+	Data struct {
+		Rootfs      string `json:"rootfs"`
+		Swap        int    `json:"swap"`
+		Description string `json:"description"`
+		Cores       int    `json:"cores"`
+		Hostname    string `json:"hostname"`
+		Digest      string `json:"digest"`
+		Ostype      string `json:"ostype"`
+		Arch        string `json:"arch"`
+		Memory      int    `json:"memory"`
+	} `json:"data"`
+}
+
+func (api *API) ConfigLXC(node string, id string) ([]byte, error) {
+	path := "/nodes/" + node + "/lxc/" + id + "/config"
+	err := api.get(path, nil)
+	if err != nil {
+		return api.resp, err
+	}
+	logger.Infof("config lxc %s", string(api.resp))
+	return api.resp, nil
+}
+
+type ConfigLXCUpdate struct {
+	VMID        string
+	Node        string
+	Hostname    string
+	Description string
+	Cores       string
+	Memory      string
+	Swap        string
+}
+
+func (api *API) ConfigLXCUpdate(data ConfigLXCUpdate) error {
+
+	path := "/nodes/" + data.Node + "/lxc/" + data.VMID + "/config?hostname=" + data.Hostname +
+		"&cores=" + data.Cores +
+		"&memory=" + data.Memory +
+		"&description=" + data.Description +
+		"&swap=" + data.Swap
+
+	err := api.put(path, nil)
+	if err != nil {
+		return err
+	}
+	logger.Infof("config lxc update %s", string(api.resp))
 	return nil
 }
