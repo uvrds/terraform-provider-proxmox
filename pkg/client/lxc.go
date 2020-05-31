@@ -58,6 +58,7 @@ type Lxc struct {
 	Description string
 	Start       string
 	Password    string
+	Swap        string
 }
 
 func (api *API) CreateLxc(data Lxc) error {
@@ -73,6 +74,7 @@ func (api *API) CreateLxc(data Lxc) error {
 		"description": data.Description,
 		"start":       data.Start,
 		"password":    data.Password,
+		"swap":        data.Swap,
 	}
 	path := "/nodes/" + data.Node + "/lxc"
 	err := api.post(path, options)
@@ -225,18 +227,18 @@ type ConfigLXCUpdate struct {
 	Description string
 	Cores       string
 	Memory      string
+	Swap        string
 }
 
 func (api *API) ConfigLXCUpdate(data ConfigLXCUpdate) error {
-	options := map[string]string{
-		"hostname":    data.Hostname,
-		"cores":       data.Cores,
-		"memory":      data.Memory,
-		"description": data.Description,
-	}
 
-	path := "/nodes/" + data.Node + "/lxc/" + data.VMID + "/config"
-	err := api.put(path, options)
+	path := "/nodes/" + data.Node + "/lxc/" + data.VMID + "/config?hostname=" + data.Hostname +
+		"&cores=" + data.Cores +
+		"&memory=" + data.Memory +
+		"&description=" + data.Description +
+		"&swap=" + data.Swap
+
+	err := api.put(path, nil)
 	if err != nil {
 		return err
 	}

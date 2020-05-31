@@ -18,6 +18,7 @@ resource "proxmox_lxc" "test" {
   description = "test2"
   password = "asdqz123"
   start = true #старт машины при создании
+  swap = "0"
 //  count = 10
 }
 

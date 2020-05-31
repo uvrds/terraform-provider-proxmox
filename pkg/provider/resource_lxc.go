@@ -46,6 +46,11 @@ func resourceLxc() *schema.Resource {
 				Required:    true,
 				Description: "The memory of lxc container",
 			},
+			"swap": {
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "The swap of lxc container",
+			},
 			"description": {
 				Type:        schema.TypeString,
 				Required:    true,
@@ -63,9 +68,9 @@ func resourceLxc() *schema.Resource {
 			},
 		},
 		Create: resourceLxcCreate,
-		Read:   resourceServerRead,
-		Update: resourceServerUpdate,
-		Delete: resourceServerDelete,
+		Read:   resourceLxcRead,
+		Update: resourceLxcUpdate,
+		Delete: resourceLxcDelete,
 	}
 }
 
@@ -103,6 +108,7 @@ func resourceLxcCreate(d *schema.ResourceData, m interface{}) error {
 		Description: d.Get("description").(string),
 		Start:       start,
 		Password:    d.Get("password").(string),
+		Swap:        d.Get("swap").(string),
 	}
 	d.SetId(vmid)
 	err = apiClient.CreateLxc(data)
@@ -110,11 +116,11 @@ func resourceLxcCreate(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 	apiClient.Cond.L.Unlock()
-	return resourceServerRead(d, m)
+	return resourceLxcRead(d, m)
 
 }
 
-func resourceServerRead(d *schema.ResourceData, m interface{}) error {
+func resourceLxcRead(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*Client).proxmox
 	apiClient.Cond.L.Lock()
 	node := d.Get("node").(string)
@@ -145,6 +151,11 @@ func resourceServerRead(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		return err
 	}
+	swapStr := strconv.Itoa(stat.Data.Swap)
+	err = d.Set("swap", swapStr)
+	if err != nil {
+		return err
+	}
 	err = d.Set("description", stat.Data.Description)
 	if err != nil {
 		return err
@@ -153,8 +164,7 @@ func resourceServerRead(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func resourceServerUpdate(d *schema.ResourceData, m interface{}) error {
-	//todo неработает
+func resourceLxcUpdate(d *schema.ResourceData, m interface{}) error {
 	var err error
 
 	apiClient := m.(*Client).proxmox
@@ -170,16 +180,17 @@ func resourceServerUpdate(d *schema.ResourceData, m interface{}) error {
 		Cores:       d.Get("cores").(string),
 		Memory:      d.Get("memory").(string),
 		Description: d.Get("description").(string),
+		Swap:        d.Get("swap").(string),
 	}
 	err = apiClient.ConfigLXCUpdate(data)
 	if err != nil {
 		return err
 	}
 	apiClient.Cond.L.Unlock()
-	return resourceServerRead(d, m)
+	return resourceLxcRead(d, m)
 }
 
-func resourceServerDelete(d *schema.ResourceData, m interface{}) error {
+func resourceLxcDelete(d *schema.ResourceData, m interface{}) error {
 
 	var err error
 
