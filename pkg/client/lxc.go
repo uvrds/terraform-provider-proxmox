@@ -175,6 +175,7 @@ type LxcClone struct {
 	Full        string
 	Cores       string
 	Memory      string
+	Swap        string
 }
 
 func (api *API) CloneLxc(data LxcClone) error {

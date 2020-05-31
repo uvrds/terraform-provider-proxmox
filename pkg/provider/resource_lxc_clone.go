@@ -59,6 +59,11 @@ func resourceLxcClone() *schema.Resource {
 				Optional:    true,
 				Description: "The full copy storage",
 			},
+			"swap": {
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "The swap lxc container",
+			},
 		},
 		Create: resourceCloneCreate,
 		Read:   resourceLxcRead,
@@ -107,6 +112,7 @@ func resourceCloneCreate(d *schema.ResourceData, m interface{}) error {
 		Full:        full,
 		Cores:       d.Get("cores").(string),
 		Memory:      d.Get("memory").(string),
+		Swap:        d.Get("swap").(string),
 	}
 	d.SetId(vmid)
 	err = apiClient.CloneLxc(data)
