@@ -174,12 +174,12 @@ func resourceLxcUpdate(d *schema.ResourceData, m interface{}) error {
 
 	}
 	data := client.ConfigLXCUpdate{
-		VMID:        d.Get("vmid").(string),
+		VMID:        d.Id(),
 		Node:        node,
 		Hostname:    d.Get("hostname").(string),
+		Description: d.Get("description").(string),
 		Cores:       d.Get("cores").(string),
 		Memory:      d.Get("memory").(string),
-		Description: d.Get("description").(string),
 		Swap:        d.Get("swap").(string),
 	}
 	err = apiClient.ConfigLXCUpdate(data)

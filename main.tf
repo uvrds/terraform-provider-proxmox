@@ -12,8 +12,8 @@ resource "proxmox_lxc" "test" {
   node = "pve"
   ostemplate = "local:vztmpl/ubuntu-18.04-standard_18.04.1-1_amd64.tar.gz"
   storage = "local-lvm"
-  hostname = "kuber01"
-  cores = "1"
+  hostname = "kuber02"
+  cores = "2"
   memory = "512" # 1024MB
   description = "test2"
   password = "asdqz123"
