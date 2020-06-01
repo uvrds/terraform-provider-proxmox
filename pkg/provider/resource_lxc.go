@@ -71,6 +71,11 @@ func resourceLxc() *schema.Resource {
 				Required:    true,
 				Description: "The searchdomain of lxc container",
 			},
+			"nameserver": {
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "The Nameserver of lxc container",
+			},
 		},
 		Create: resourceLxcCreate,
 		Read:   resourceLxcRead,
@@ -115,6 +120,7 @@ func resourceLxcCreate(d *schema.ResourceData, m interface{}) error {
 		Password:     d.Get("password").(string),
 		Swap:         d.Get("swap").(string),
 		Searchdomain: d.Get("searchdomain").(string),
+		Nameserver:   d.Get("nameserver").(string),
 	}
 	d.SetId(vmid)
 	err = apiClient.CreateLxc(data)
@@ -170,6 +176,10 @@ func resourceLxcRead(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		return err
 	}
+	err = d.Set("nameserver", stat.Data.Nameserver)
+	if err != nil {
+		return err
+	}
 	apiClient.Cond.L.Unlock()
 	return nil
 }
@@ -192,6 +202,7 @@ func resourceLxcUpdate(d *schema.ResourceData, m interface{}) error {
 		Memory:       d.Get("memory").(string),
 		Swap:         d.Get("swap").(string),
 		Searchdomain: d.Get("searchdomain").(string),
+		Nameserver:   d.Get("nameserver").(string),
 	}
 	err = apiClient.ConfigLXCUpdate(data)
 	if err != nil {

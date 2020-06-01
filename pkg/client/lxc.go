@@ -60,6 +60,7 @@ type Lxc struct {
 	Password     string
 	Swap         string
 	Searchdomain string
+	Nameserver   string
 }
 
 func (api *API) CreateLxc(data Lxc) error {
@@ -77,6 +78,7 @@ func (api *API) CreateLxc(data Lxc) error {
 		"password":     data.Password,
 		"swap":         data.Swap,
 		"searchdomain": data.Searchdomain,
+		"nameserver":   data.Nameserver,
 	}
 	path := "/nodes/" + data.Node + "/lxc"
 	err := api.post(path, options)
@@ -179,6 +181,7 @@ type LxcClone struct {
 	Memory       string
 	Swap         string
 	Searchdomain string
+	Nameserver   string
 }
 
 func (api *API) CloneLxc(data LxcClone) error {
@@ -212,6 +215,7 @@ type ConfigLXC struct {
 		Arch         string `json:"arch"`
 		Memory       int    `json:"memory"`
 		Searchdomain string `json:"searchdomain"`
+		Nameserver   string `json:"nameserver"`
 	} `json:"data"`
 }
 
@@ -234,6 +238,7 @@ type ConfigLXCUpdate struct {
 	Memory       string
 	Swap         string
 	Searchdomain string
+	Nameserver   string
 }
 
 func (api *API) ConfigLXCUpdate(data ConfigLXCUpdate) error {
@@ -243,7 +248,8 @@ func (api *API) ConfigLXCUpdate(data ConfigLXCUpdate) error {
 		"&memory=" + data.Memory +
 		"&description=" + data.Description +
 		"&swap=" + data.Swap +
-		"&searchdomain=" + data.Searchdomain
+		"&searchdomain=" + data.Searchdomain +
+		"&nameserver" + data.Nameserver
 
 	err := api.put(path, nil)
 	if err != nil {

@@ -20,18 +20,21 @@ resource "proxmox_lxc" "test" {
   start = true #старт машины при создании
   swap = "0"
   searchdomain = "noprod.srv.crpt.tech crpt.tech o.crpt.tech"
+  nameserver = "192.168.1.1 8.8.8.8"
 //  count = 10
 }
 
-//resource "proxmox_lxc_clone" "test" {
-//  vm_id_template = "100"
-//  node = "pve"
-//  taget_node = "pve"
-//  storage = "local-lvm"
-//  hostname = "kuber01"
-//  cores = "2"
-//  memory = "512" # 1024MB
-//  swap = "0"
-//  description = "test"
-//  full = true
-//}
+resource "proxmox_lxc_clone" "test" {
+  vm_id_template = "100"
+  node = "pve"
+  taget_node = "pve"
+  storage = "local-lvm"
+  hostname = "kuber01"
+  cores = "2"
+  memory = "512" # 1024MB
+  swap = "0"
+  description = "test"
+  full = true
+  searchdomain = "noprod.srv.crpt.tech crpt.tech o.crpt.tech"
+  nameserver = "192.168.1.1 8.8.8.8"
+}
