@@ -41,11 +41,12 @@ func main() {
 		Node:         "pve",
 		Hostname:     "kuber",
 		Description:  "test",
-		Cores:        "1",
-		Memory:       "512",
+		Cores:        "2",
+		Memory:       "513",
 		Swap:         "0",
-		Searchdomain: "test",
-		Rootfs:       "5",
+		Searchdomain: "vk.com",
+		Rootfs:       "23",
+		Nameserver:   "192.168.1.1",
 	}
 	t.ConfigLXCUpdate(data)
 

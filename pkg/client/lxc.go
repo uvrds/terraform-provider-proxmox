@@ -247,32 +247,36 @@ type ConfigLXCUpdate struct {
 
 func (api *API) ConfigLXCUpdate(data ConfigLXCUpdate) error {
 
-	path := "/nodes/" + data.Node + "/lxc/" + data.VMID + "/config?hostname=" + data.Hostname +
+	path := "/nodes/" + data.Node + "/lxc/" + data.VMID + "/config" +
+		"?hostname=" + data.Hostname +
 		"&cores=" + data.Cores +
 		"&memory=" + data.Memory +
 		"&description=" + data.Description +
 		"&swap=" + data.Swap +
+		//todo вынести в отдельную ф-ции т.к. требуется перезапуск хоста.
 		"&searchdomain=" + data.Searchdomain +
-		"&nameserver" + data.Nameserver
+		"&nameserver=" + data.Nameserver
 
 	err := api.put(path, nil)
 	if err != nil {
 		return err
 	}
 	logger.Infof("config lxc update %s", string(api.resp))
-	//	err = api.resizeLXC(data)
-	//	if err != nil {
-	//		return err
-	//	}
+	err = api.resizeLXC(data)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
-//todo не работает
 func (api *API) resizeLXC(data ConfigLXCUpdate) error {
+	path := "/nodes/" + data.Node + "/lxc/" + data.VMID + "/resize"
 
-	path := "/nodes/" + data.Node + "/lxc/" + data.VMID + "/resize?disk=rootfs&disk=2"
-
-	err := api.put(path, nil)
+	options := map[string]string{
+		"disk": "rootfs",
+		"size": data.Rootfs + "G",
+	}
+	err := api.put(path, options)
 	if err != nil {
 		return err
 	}
