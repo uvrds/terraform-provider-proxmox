@@ -74,6 +74,11 @@ func resourceLxcClone() *schema.Resource {
 				Required:    true,
 				Description: "The Nameserver of lxc container",
 			},
+			"rootfs": {
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "The Nameserver of lxc container",
+			},
 		},
 		Create: resourceCloneCreate,
 		Read:   resourceLxcRead,
@@ -126,6 +131,7 @@ func resourceCloneCreate(d *schema.ResourceData, m interface{}) error {
 		Swap:         d.Get("swap").(string),
 		Searchdomain: d.Get("searchdomain").(string),
 		Nameserver:   d.Get("nameserver").(string),
+		Rootfs:       d.Get("rootfs").(string),
 	}
 
 	d.SetId(vmid)

@@ -61,10 +61,10 @@ type Lxc struct {
 	Swap         string
 	Searchdomain string
 	Nameserver   string
+	Rootfs       string
 }
 
 func (api *API) CreateLxc(data Lxc) error {
-	//todo возомжно надо отлавливать ошибку о том что не создался lxc и пробывать снова создать. вместо sleep
 	time.Sleep(time.Second * 2)
 	options := map[string]string{
 		"ostemplate":   data.Ostemplate,
@@ -79,6 +79,7 @@ func (api *API) CreateLxc(data Lxc) error {
 		"swap":         data.Swap,
 		"searchdomain": data.Searchdomain,
 		"nameserver":   data.Nameserver,
+		"rootfs":       data.Rootfs,
 	}
 	path := "/nodes/" + data.Node + "/lxc"
 	err := api.post(path, options)
@@ -101,7 +102,7 @@ func (api *API) Deletelxc(data Lxc) error {
 		if err != nil {
 			return err
 		}
-		b, err := api.сheckLxc(data.Node, data.VMID)
+		b, err := api.CheckLxc(data.Node, data.VMID)
 		if err != nil {
 			return err
 		}
@@ -122,7 +123,7 @@ func (api *API) stopLxc(node string, vmid string) error {
 	var s = true
 
 	for s {
-		b, err := api.сheckLxc(node, vmid)
+		b, err := api.CheckLxc(node, vmid)
 		if err != nil {
 			return err
 		}
@@ -150,7 +151,7 @@ type CheckLxc struct {
 	Data interface{} `json:"data"`
 }
 
-func (api *API) сheckLxc(node string, vmid string) (bool, error) {
+func (api *API) CheckLxc(node string, vmid string) (bool, error) {
 	resp, err := api.StatusLXC(node, vmid)
 	if err != nil {
 		return false, err
@@ -182,6 +183,7 @@ type LxcClone struct {
 	Swap         string
 	Searchdomain string
 	Nameserver   string
+	Rootfs       string
 }
 
 func (api *API) CloneLxc(data LxcClone) error {
@@ -216,6 +218,7 @@ type ConfigLXC struct {
 		Memory       int    `json:"memory"`
 		Searchdomain string `json:"searchdomain"`
 		Nameserver   string `json:"nameserver"`
+		Lock         string `json:"lock"`
 	} `json:"data"`
 }
 
@@ -239,6 +242,7 @@ type ConfigLXCUpdate struct {
 	Swap         string
 	Searchdomain string
 	Nameserver   string
+	Rootfs       string
 }
 
 func (api *API) ConfigLXCUpdate(data ConfigLXCUpdate) error {
@@ -249,7 +253,8 @@ func (api *API) ConfigLXCUpdate(data ConfigLXCUpdate) error {
 		"&description=" + data.Description +
 		"&swap=" + data.Swap +
 		"&searchdomain=" + data.Searchdomain +
-		"&nameserver" + data.Nameserver
+		"&nameserver" + data.Nameserver +
+		"&rootfs=" + data.Rootfs
 
 	err := api.put(path, nil)
 	if err != nil {

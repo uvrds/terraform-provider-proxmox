@@ -5,7 +5,9 @@ import (
 	"github.com/VictoriaMetrics/VictoriaMetrics/lib/logger"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/terraform-provider-proxmox/pkg/client"
+	"regexp"
 	"strconv"
+	"strings"
 )
 
 func resourceLxc() *schema.Resource {
@@ -76,6 +78,11 @@ func resourceLxc() *schema.Resource {
 				Required:    true,
 				Description: "The Nameserver of lxc container",
 			},
+			"rootfs": {
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "The Rootfs of lxc container",
+			},
 		},
 		Create: resourceLxcCreate,
 		Read:   resourceLxcRead,
@@ -121,6 +128,7 @@ func resourceLxcCreate(d *schema.ResourceData, m interface{}) error {
 		Swap:         d.Get("swap").(string),
 		Searchdomain: d.Get("searchdomain").(string),
 		Nameserver:   d.Get("nameserver").(string),
+		Rootfs:       d.Get("rootfs").(string),
 	}
 	d.SetId(vmid)
 	err = apiClient.CreateLxc(data)
@@ -180,6 +188,15 @@ func resourceLxcRead(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		return err
 	}
+	if stat.Data.Lock != "create" {
+		spl := strings.Split(stat.Data.Rootfs, "=")
+		re := regexp.MustCompile("[0-9]+")
+		err = d.Set("rootfs", re.FindAllString(spl[1], -1)[0])
+		if err != nil {
+			return err
+		}
+	}
+
 	apiClient.Cond.L.Unlock()
 	return nil
 }
@@ -203,6 +220,7 @@ func resourceLxcUpdate(d *schema.ResourceData, m interface{}) error {
 		Swap:         d.Get("swap").(string),
 		Searchdomain: d.Get("searchdomain").(string),
 		Nameserver:   d.Get("nameserver").(string),
+		Rootfs:       d.Get("rootfs").(string),
 	}
 	err = apiClient.ConfigLXCUpdate(data)
 	if err != nil {
