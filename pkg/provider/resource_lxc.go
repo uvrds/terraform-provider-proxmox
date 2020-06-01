@@ -5,7 +5,9 @@ import (
 	"github.com/VictoriaMetrics/VictoriaMetrics/lib/logger"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/terraform-provider-proxmox/pkg/client"
+	"regexp"
 	"strconv"
+	"strings"
 )
 
 func resourceLxc() *schema.Resource {
@@ -48,8 +50,9 @@ func resourceLxc() *schema.Resource {
 			},
 			"swap": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				Description: "The swap of lxc container",
+				Default:     "0",
 			},
 			"description": {
 				Type:        schema.TypeString,
@@ -63,8 +66,24 @@ func resourceLxc() *schema.Resource {
 			},
 			"start": {
 				Type:        schema.TypeBool,
-				Required:    true,
+				Optional:    true,
 				Description: "The start of lxc container",
+				Default:     true,
+			},
+			"searchdomain": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The searchdomain of lxc container",
+			},
+			"nameserver": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The Nameserver of lxc container",
+			},
+			"rootfs": {
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "The Rootfs of lxc container",
 			},
 		},
 		Create: resourceLxcCreate,
@@ -98,17 +117,20 @@ func resourceLxcCreate(d *schema.ResourceData, m interface{}) error {
 		start = "0"
 	}
 	data := client.Lxc{
-		VMID:        vmid,
-		Ostemplate:  d.Get("ostemplate").(string),
-		Storage:     d.Get("storage").(string),
-		Node:        node,
-		Hostname:    d.Get("hostname").(string),
-		Cores:       d.Get("cores").(string),
-		Memory:      d.Get("memory").(string),
-		Description: d.Get("description").(string),
-		Start:       start,
-		Password:    d.Get("password").(string),
-		Swap:        d.Get("swap").(string),
+		VMID:         vmid,
+		Ostemplate:   d.Get("ostemplate").(string),
+		Storage:      d.Get("storage").(string),
+		Node:         node,
+		Hostname:     d.Get("hostname").(string),
+		Cores:        d.Get("cores").(string),
+		Memory:       d.Get("memory").(string),
+		Description:  d.Get("description").(string),
+		Start:        start,
+		Password:     d.Get("password").(string),
+		Swap:         d.Get("swap").(string),
+		Searchdomain: d.Get("searchdomain").(string),
+		Nameserver:   d.Get("nameserver").(string),
+		Rootfs:       d.Get("rootfs").(string),
 	}
 	d.SetId(vmid)
 	err = apiClient.CreateLxc(data)
@@ -160,6 +182,23 @@ func resourceLxcRead(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		return err
 	}
+	err = d.Set("searchdomain", stat.Data.Searchdomain)
+	if err != nil {
+		return err
+	}
+	err = d.Set("nameserver", stat.Data.Nameserver)
+	if err != nil {
+		return err
+	}
+	if stat.Data.Lock != "create" {
+		spl := strings.Split(stat.Data.Rootfs, "=")
+		re := regexp.MustCompile("[0-9]+")
+		err = d.Set("rootfs", re.FindAllString(spl[1], -1)[0])
+		if err != nil {
+			return err
+		}
+	}
+
 	apiClient.Cond.L.Unlock()
 	return nil
 }
@@ -174,13 +213,16 @@ func resourceLxcUpdate(d *schema.ResourceData, m interface{}) error {
 
 	}
 	data := client.ConfigLXCUpdate{
-		VMID:        d.Get("vmid").(string),
-		Node:        node,
-		Hostname:    d.Get("hostname").(string),
-		Cores:       d.Get("cores").(string),
-		Memory:      d.Get("memory").(string),
-		Description: d.Get("description").(string),
-		Swap:        d.Get("swap").(string),
+		VMID:         d.Id(),
+		Node:         node,
+		Hostname:     d.Get("hostname").(string),
+		Description:  d.Get("description").(string),
+		Cores:        d.Get("cores").(string),
+		Memory:       d.Get("memory").(string),
+		Swap:         d.Get("swap").(string),
+		Searchdomain: d.Get("searchdomain").(string),
+		Nameserver:   d.Get("nameserver").(string),
+		Rootfs:       d.Get("rootfs").(string),
 	}
 	err = apiClient.ConfigLXCUpdate(data)
 	if err != nil {
