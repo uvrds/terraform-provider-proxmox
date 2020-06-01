@@ -48,33 +48,35 @@ func (api *API) StatusLXC(node string, id string) ([]byte, error) {
 }
 
 type Lxc struct {
-	VMID        string
-	Ostemplate  string
-	Storage     string
-	Node        string
-	Hostname    string
-	Cores       string
-	Memory      string
-	Description string
-	Start       string
-	Password    string
-	Swap        string
+	VMID         string
+	Ostemplate   string
+	Storage      string
+	Node         string
+	Hostname     string
+	Cores        string
+	Memory       string
+	Description  string
+	Start        string
+	Password     string
+	Swap         string
+	Searchdomain string
 }
 
 func (api *API) CreateLxc(data Lxc) error {
 	//todo возомжно надо отлавливать ошибку о том что не создался lxc и пробывать снова создать. вместо sleep
 	time.Sleep(time.Second * 2)
 	options := map[string]string{
-		"ostemplate":  data.Ostemplate,
-		"vmid":        data.VMID,
-		"storage":     data.Storage,
-		"hostname":    data.Hostname,
-		"cores":       data.Cores,
-		"memory":      data.Memory,
-		"description": data.Description,
-		"start":       data.Start,
-		"password":    data.Password,
-		"swap":        data.Swap,
+		"ostemplate":   data.Ostemplate,
+		"vmid":         data.VMID,
+		"storage":      data.Storage,
+		"hostname":     data.Hostname,
+		"cores":        data.Cores,
+		"memory":       data.Memory,
+		"description":  data.Description,
+		"start":        data.Start,
+		"password":     data.Password,
+		"swap":         data.Swap,
+		"searchdomain": data.Searchdomain,
 	}
 	path := "/nodes/" + data.Node + "/lxc"
 	err := api.post(path, options)
@@ -165,17 +167,18 @@ func (api *API) сheckLxc(node string, vmid string) (bool, error) {
 }
 
 type LxcClone struct {
-	VMID        string
-	NEWID       string
-	Storage     string
-	Node        string
-	TargetNode  string
-	Hostname    string
-	Description string
-	Full        string
-	Cores       string
-	Memory      string
-	Swap        string
+	VMID         string
+	NEWID        string
+	Storage      string
+	Node         string
+	TargetNode   string
+	Hostname     string
+	Description  string
+	Full         string
+	Cores        string
+	Memory       string
+	Swap         string
+	Searchdomain string
 }
 
 func (api *API) CloneLxc(data LxcClone) error {
@@ -199,15 +202,16 @@ func (api *API) CloneLxc(data LxcClone) error {
 
 type ConfigLXC struct {
 	Data struct {
-		Rootfs      string `json:"rootfs"`
-		Swap        int    `json:"swap"`
-		Description string `json:"description"`
-		Cores       int    `json:"cores"`
-		Hostname    string `json:"hostname"`
-		Digest      string `json:"digest"`
-		Ostype      string `json:"ostype"`
-		Arch        string `json:"arch"`
-		Memory      int    `json:"memory"`
+		Rootfs       string `json:"rootfs"`
+		Swap         int    `json:"swap"`
+		Description  string `json:"description"`
+		Cores        int    `json:"cores"`
+		Hostname     string `json:"hostname"`
+		Digest       string `json:"digest"`
+		Ostype       string `json:"ostype"`
+		Arch         string `json:"arch"`
+		Memory       int    `json:"memory"`
+		Searchdomain string `json:"searchdomain"`
 	} `json:"data"`
 }
 
@@ -222,13 +226,14 @@ func (api *API) ConfigLXC(node string, id string) ([]byte, error) {
 }
 
 type ConfigLXCUpdate struct {
-	VMID        string
-	Node        string
-	Hostname    string
-	Description string
-	Cores       string
-	Memory      string
-	Swap        string
+	VMID         string
+	Node         string
+	Hostname     string
+	Description  string
+	Cores        string
+	Memory       string
+	Swap         string
+	Searchdomain string
 }
 
 func (api *API) ConfigLXCUpdate(data ConfigLXCUpdate) error {
@@ -237,7 +242,8 @@ func (api *API) ConfigLXCUpdate(data ConfigLXCUpdate) error {
 		"&cores=" + data.Cores +
 		"&memory=" + data.Memory +
 		"&description=" + data.Description +
-		"&swap=" + data.Swap
+		"&swap=" + data.Swap +
+		"&searchdomain=" + data.Searchdomain
 
 	err := api.put(path, nil)
 	if err != nil {

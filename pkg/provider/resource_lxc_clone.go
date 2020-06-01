@@ -64,6 +64,11 @@ func resourceLxcClone() *schema.Resource {
 				Required:    true,
 				Description: "The swap lxc container",
 			},
+			"searchdomain": {
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "The searchdomain of lxc container",
+			},
 		},
 		Create: resourceCloneCreate,
 		Read:   resourceLxcRead,
@@ -102,18 +107,20 @@ func resourceCloneCreate(d *schema.ResourceData, m interface{}) error {
 	}
 
 	data := client.LxcClone{
-		VMID:        d.Get("vm_id_template").(string),
-		NEWID:       vmid,
-		Storage:     d.Get("storage").(string),
-		Node:        node,
-		TargetNode:  targetNode,
-		Hostname:    d.Get("hostname").(string),
-		Description: d.Get("description").(string),
-		Full:        full,
-		Cores:       d.Get("cores").(string),
-		Memory:      d.Get("memory").(string),
-		Swap:        d.Get("swap").(string),
+		VMID:         d.Get("vm_id_template").(string),
+		NEWID:        vmid,
+		Storage:      d.Get("storage").(string),
+		Node:         node,
+		TargetNode:   targetNode,
+		Hostname:     d.Get("hostname").(string),
+		Description:  d.Get("description").(string),
+		Full:         full,
+		Cores:        d.Get("cores").(string),
+		Memory:       d.Get("memory").(string),
+		Swap:         d.Get("swap").(string),
+		Searchdomain: d.Get("searchdomain").(string),
 	}
+
 	d.SetId(vmid)
 	err = apiClient.CloneLxc(data)
 	if err != nil {

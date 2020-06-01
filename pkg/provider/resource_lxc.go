@@ -66,6 +66,11 @@ func resourceLxc() *schema.Resource {
 				Required:    true,
 				Description: "The start of lxc container",
 			},
+			"searchdomain": {
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "The searchdomain of lxc container",
+			},
 		},
 		Create: resourceLxcCreate,
 		Read:   resourceLxcRead,
@@ -98,17 +103,18 @@ func resourceLxcCreate(d *schema.ResourceData, m interface{}) error {
 		start = "0"
 	}
 	data := client.Lxc{
-		VMID:        vmid,
-		Ostemplate:  d.Get("ostemplate").(string),
-		Storage:     d.Get("storage").(string),
-		Node:        node,
-		Hostname:    d.Get("hostname").(string),
-		Cores:       d.Get("cores").(string),
-		Memory:      d.Get("memory").(string),
-		Description: d.Get("description").(string),
-		Start:       start,
-		Password:    d.Get("password").(string),
-		Swap:        d.Get("swap").(string),
+		VMID:         vmid,
+		Ostemplate:   d.Get("ostemplate").(string),
+		Storage:      d.Get("storage").(string),
+		Node:         node,
+		Hostname:     d.Get("hostname").(string),
+		Cores:        d.Get("cores").(string),
+		Memory:       d.Get("memory").(string),
+		Description:  d.Get("description").(string),
+		Start:        start,
+		Password:     d.Get("password").(string),
+		Swap:         d.Get("swap").(string),
+		Searchdomain: d.Get("searchdomain").(string),
 	}
 	d.SetId(vmid)
 	err = apiClient.CreateLxc(data)
@@ -160,6 +166,10 @@ func resourceLxcRead(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		return err
 	}
+	err = d.Set("searchdomain", stat.Data.Searchdomain)
+	if err != nil {
+		return err
+	}
 	apiClient.Cond.L.Unlock()
 	return nil
 }
@@ -174,13 +184,14 @@ func resourceLxcUpdate(d *schema.ResourceData, m interface{}) error {
 
 	}
 	data := client.ConfigLXCUpdate{
-		VMID:        d.Id(),
-		Node:        node,
-		Hostname:    d.Get("hostname").(string),
-		Description: d.Get("description").(string),
-		Cores:       d.Get("cores").(string),
-		Memory:      d.Get("memory").(string),
-		Swap:        d.Get("swap").(string),
+		VMID:         d.Id(),
+		Node:         node,
+		Hostname:     d.Get("hostname").(string),
+		Description:  d.Get("description").(string),
+		Cores:        d.Get("cores").(string),
+		Memory:       d.Get("memory").(string),
+		Swap:         d.Get("swap").(string),
+		Searchdomain: d.Get("searchdomain").(string),
 	}
 	err = apiClient.ConfigLXCUpdate(data)
 	if err != nil {
