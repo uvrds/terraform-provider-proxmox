@@ -260,10 +260,10 @@ func (api *API) ConfigLXCUpdate(data ConfigLXCUpdate) error {
 		return err
 	}
 	logger.Infof("config lxc update %s", string(api.resp))
-	err = api.resizeLXC(data)
-	if err != nil {
-		return err
-	}
+	//	err = api.resizeLXC(data)
+	//	if err != nil {
+	//		return err
+	//	}
 	return nil
 }
 
