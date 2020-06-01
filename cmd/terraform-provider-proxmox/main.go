@@ -1,11 +1,7 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
 	"github.com/terraform-provider-proxmox/pkg/client"
-	"regexp"
-	"strings"
 )
 
 func main() {
@@ -39,35 +35,39 @@ func main() {
 	//t.CreateLxc(data)
 
 	//update
-	//data := client.ConfigLXCUpdate{
-	//	VMID:         "102",
-	//	Node:         "pve",
-	//	Hostname:     "kuber",
-	//	Description:  "test",
-	//	Cores:        "1",
-	//	Memory:       "2",
-	//	Swap:         "0",
-	//	Searchdomain: "test",
-	//}
-	//t.ConfigLXCUpdate(data)
+
+	data := client.ConfigLXCUpdate{
+		VMID:         "102",
+		Node:         "pve",
+		Hostname:     "kuber",
+		Description:  "test",
+		Cores:        "1",
+		Memory:       "512",
+		Swap:         "0",
+		Searchdomain: "test",
+		Rootfs:       "5",
+	}
+	t.ConfigLXCUpdate(data)
 
 	//read
-	resp, err := t.ConfigLXC("pve", "102")
-	if err != nil {
-		fmt.Println(err)
-	}
-	var stat client.ConfigLXC
-	err = json.Unmarshal(resp, &stat)
-	if err != nil {
-		fmt.Println(err)
-	}
 
-	spl := strings.Split(stat.Data.Rootfs, "=")
-	re := regexp.MustCompile("[0-9]+")
-	te := re.FindAllString(spl[1], -1)
-	fmt.Println(te)
+	//resp, err := t.ConfigLXC("pve", "102")
+	//if err != nil {
+	//	fmt.Println(err)
+	//}
+	//var stat client.ConfigLXC
+	//err = json.Unmarshal(resp, &stat)
+	//if err != nil {
+	//	fmt.Println(err)
+	//}
+	//
+	//spl := strings.Split(stat.Data.Rootfs, "=")
+	//re := regexp.MustCompile("[0-9]+")
+	//te := re.FindAllString(spl[1], -1)
+	//fmt.Println(te)
 
 	//delete
+
 	//data := client.Lxc{
 	//	VMID:         "102",
 	//	Ostemplate:   "local:vztmpl/ubuntu-18.04-standard_18.04.1-1_amd64.tar.gz",

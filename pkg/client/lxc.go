@@ -102,7 +102,7 @@ func (api *API) Deletelxc(data Lxc) error {
 		if err != nil {
 			return err
 		}
-		b, err := api.CheckLxc(data.Node, data.VMID)
+		b, err := api.checkLxc(data.Node, data.VMID)
 		if err != nil {
 			return err
 		}
@@ -123,7 +123,7 @@ func (api *API) stopLxc(node string, vmid string) error {
 	var s = true
 
 	for s {
-		b, err := api.CheckLxc(node, vmid)
+		b, err := api.checkLxc(node, vmid)
 		if err != nil {
 			return err
 		}
@@ -151,7 +151,7 @@ type CheckLxc struct {
 	Data interface{} `json:"data"`
 }
 
-func (api *API) CheckLxc(node string, vmid string) (bool, error) {
+func (api *API) checkLxc(node string, vmid string) (bool, error) {
 	resp, err := api.StatusLXC(node, vmid)
 	if err != nil {
 		return false, err
@@ -253,13 +253,29 @@ func (api *API) ConfigLXCUpdate(data ConfigLXCUpdate) error {
 		"&description=" + data.Description +
 		"&swap=" + data.Swap +
 		"&searchdomain=" + data.Searchdomain +
-		"&nameserver" + data.Nameserver +
-		"&rootfs=" + data.Rootfs
+		"&nameserver" + data.Nameserver
 
 	err := api.put(path, nil)
 	if err != nil {
 		return err
 	}
 	logger.Infof("config lxc update %s", string(api.resp))
+	err = api.resizeLXC(data)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+//todo не работает
+func (api *API) resizeLXC(data ConfigLXCUpdate) error {
+
+	path := "/nodes/" + data.Node + "/lxc/" + data.VMID + "/resize?disk=rootfs&disk=2"
+
+	err := api.put(path, nil)
+	if err != nil {
+		return err
+	}
+	logger.Infof("disk lxc update %s", string(api.resp))
 	return nil
 }

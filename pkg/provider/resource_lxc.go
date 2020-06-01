@@ -50,8 +50,9 @@ func resourceLxc() *schema.Resource {
 			},
 			"swap": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				Description: "The swap of lxc container",
+				Default:     "0",
 			},
 			"description": {
 				Type:        schema.TypeString,
@@ -65,17 +66,18 @@ func resourceLxc() *schema.Resource {
 			},
 			"start": {
 				Type:        schema.TypeBool,
-				Required:    true,
+				Optional:    true,
 				Description: "The start of lxc container",
+				Default:     true,
 			},
 			"searchdomain": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				Description: "The searchdomain of lxc container",
 			},
 			"nameserver": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				Description: "The Nameserver of lxc container",
 			},
 			"rootfs": {
