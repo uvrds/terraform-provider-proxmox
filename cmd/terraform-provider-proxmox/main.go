@@ -10,9 +10,9 @@ func main() {
 	BaseURL := "https://192.168.122.54:8006/api2/json"
 	Username := "root@pam"
 	Password := "asdqz123"
-	//BaseURL := "https://proxmox03.noprod.srv.crpt.tech:8006/api2/json"
+	//BaseURL := "*"
 	//Username := "vfrolov@pam"
-	//Password := "Vfrfhjyf!564236"
+	//Password := "*"
 
 	t := client.NewClient(BaseURL, Username, Password, true)
 	id, err := t.NextId()
