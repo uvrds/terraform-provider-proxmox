@@ -80,6 +80,7 @@ func (api *API) CreateLxc(data Lxc) error {
 		"searchdomain": data.Searchdomain,
 		"nameserver":   data.Nameserver,
 		"rootfs":       data.Rootfs,
+		"net0":         "name=eth0,bridge=vmbr0,firewall=1,gw=192.168.122.1,ip=192.168.122.80/24",
 	}
 	path := "/nodes/" + data.Node + "/lxc"
 	err := api.post(path, options)
