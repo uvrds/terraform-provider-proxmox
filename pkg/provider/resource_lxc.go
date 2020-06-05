@@ -162,7 +162,7 @@ func resourceLxcRead(d *schema.ResourceData, m interface{}) error {
 	if node == "" {
 
 	}
-	resp, err := apiClient.ConfigLXC(node, d.Id())
+	resp, err := apiClient.ReadConfigLXC(node, d.Id())
 	if err != nil {
 		return err
 	}
@@ -211,7 +211,12 @@ func resourceLxcRead(d *schema.ResourceData, m interface{}) error {
 			return err
 		}
 	}
-
+	net := stat.Data.Net0
+	net0 := +"[" + stat.Data.Net0 + "]"
+	err = d.Set("net")
+	if err != nil {
+		return err
+	}
 	apiClient.Cond.L.Unlock()
 	return nil
 }

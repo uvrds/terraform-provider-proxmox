@@ -73,7 +73,7 @@ func (api *API) CreateLxc(data Lxc) error {
 	trimR := strings.TrimRight(str, "]")
 	trimL := strings.TrimLeft(trimR, "[")
 
-	//logger.Infof("TEST: %s", trimL)
+	//wlogger.Infof("TEST: %s", trimL)
 
 	options := map[string]string{
 		"ostemplate":   data.Ostemplate,
@@ -229,10 +229,11 @@ type ConfigLXC struct {
 		Searchdomain string `json:"searchdomain"`
 		Nameserver   string `json:"nameserver"`
 		Lock         string `json:"lock"`
+		Net0         string `json:"net0"`
 	} `json:"data"`
 }
 
-func (api *API) ConfigLXC(node string, id string) ([]byte, error) {
+func (api *API) ReadConfigLXC(node string, id string) ([]byte, error) {
 	path := "/nodes/" + node + "/lxc/" + id + "/config"
 	err := api.get(path, nil)
 	if err != nil {
