@@ -11,19 +11,25 @@ provider "proxmox" {
 }
 
 resource "proxmox_lxc" "test" {
-  node         = "pve"
-  ostemplate   = "local:vztmpl/ubuntu-18.04-standard_18.04.1-1_amd64.tar.gz"
-  storage      = "local-lvm"
-  hostname     = "kuber03"
-  cores        = "1"
-  memory       = "523" # 1024MB
-  description  = "test2"
-  password     = "asdqz123"
-  start        = true #старт машины при создании
-  swap         = "0"
+  node = "pve"
+  ostemplate = "local:vztmpl/ubuntu-18.04-standard_18.04.1-1_amd64.tar.gz"
+  storage = "local-lvm"
+  hostname = "kuber03"
+  cores = "1"
+  memory = "523"
+  # 1024MB
+  description = "test2"
+  password = "asdqz123"
+  start = true
+  #старт машины при создании
+  swap = "0"
   searchdomain = "noprod.srv.crpt.tech"
-  nameserver   = "192.168.1.1"
-  rootfs       = "22" #size disk 10G
+  nameserver = "192.168.1.1"
+  rootfs = "22"
+  #size disk 10G
+  net = [
+    "name=eth0,bridge=vmbr0,gw=192.168.122.1,ip=192.168.122.80/24"
+  ]
   //  count = 10
 }
 
@@ -41,4 +47,7 @@ resource "proxmox_lxc" "test" {
 //  searchdomain = "noprod.srv.crpt.tech crpt.tech o.crpt.tech"
 //  nameserver = "192.168.1.1 8.8.8.8"
 //  rootfs = "6"
+//net = [
+//  "name=eth0,bridge=vmbr0,gw=192.168.122.1,ip=192.168.122.80/24"
+//]
 //}

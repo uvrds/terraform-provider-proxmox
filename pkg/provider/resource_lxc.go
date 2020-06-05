@@ -85,7 +85,16 @@ func resourceLxc() *schema.Resource {
 				Required:    true,
 				Description: "The Rootfs of lxc container",
 			},
+			"net": {
+				Type:        schema.TypeList,
+				Required:    true,
+				Description: "The network of lxc container",
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
 		},
+
 		Create: resourceLxcCreate,
 		Read:   resourceLxcRead,
 		Update: resourceLxcUpdate,
@@ -109,6 +118,7 @@ func resourceLxcCreate(d *schema.ResourceData, m interface{}) error {
 			logger.Fatalf(" id not get %s", err)
 		}
 	}
+	//todo написать 1 ф-цию для подобных конструкций
 	var start string
 	f := d.Get("start").(bool)
 	if f {
@@ -116,6 +126,8 @@ func resourceLxcCreate(d *schema.ResourceData, m interface{}) error {
 	} else {
 		start = "0"
 	}
+	//
+
 	data := client.Lxc{
 		VMID:         vmid,
 		Ostemplate:   d.Get("ostemplate").(string),
@@ -131,6 +143,7 @@ func resourceLxcCreate(d *schema.ResourceData, m interface{}) error {
 		Searchdomain: d.Get("searchdomain").(string),
 		Nameserver:   d.Get("nameserver").(string),
 		Rootfs:       d.Get("rootfs").(string),
+		Net:          d.Get("net").(interface{}),
 	}
 	d.SetId(vmid)
 	err = apiClient.CreateLxc(data)
