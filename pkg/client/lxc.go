@@ -2,9 +2,8 @@ package client
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/VictoriaMetrics/VictoriaMetrics/lib/logger"
-	"strings"
+	"reflect"
 	"time"
 )
 
@@ -69,11 +68,17 @@ type Lxc struct {
 
 func (api *API) CreateLxc(data Lxc) error {
 	time.Sleep(time.Second * 2)
-	str := fmt.Sprintf("%s", data.Net)
-	trimR := strings.TrimRight(str, "]")
-	trimL := strings.TrimLeft(trimR, "[")
 
-	//wlogger.Infof("TEST: %s", trimL)
+	s := reflect.ValueOf(data.Net)
+	if s.Kind() != reflect.Slice {
+		logger.Fatalf("err")
+	}
+
+	ret := make([]interface{}, s.Len())
+
+	for i := 0; i < s.Len(); i++ {
+		ret[i] = s.Index(i).Interface()
+	}
 
 	options := map[string]string{
 		"ostemplate":   data.Ostemplate,
@@ -89,7 +94,7 @@ func (api *API) CreateLxc(data Lxc) error {
 		"searchdomain": data.Searchdomain,
 		"nameserver":   data.Nameserver,
 		"rootfs":       data.Rootfs,
-		"net0":         trimL,
+		"net0":         ret[0].(string),
 	}
 	path := "/nodes/" + data.Node + "/lxc"
 	err := api.post(path, options)

@@ -126,8 +126,6 @@ func resourceLxcCreate(d *schema.ResourceData, m interface{}) error {
 	} else {
 		start = "0"
 	}
-	//
-
 	data := client.Lxc{
 		VMID:         vmid,
 		Ostemplate:   d.Get("ostemplate").(string),
@@ -211,12 +209,7 @@ func resourceLxcRead(d *schema.ResourceData, m interface{}) error {
 			return err
 		}
 	}
-	net := stat.Data.Net0
-	net0 := +"[" + stat.Data.Net0 + "]"
-	err = d.Set("net")
-	if err != nil {
-		return err
-	}
+
 	apiClient.Cond.L.Unlock()
 	return nil
 }
