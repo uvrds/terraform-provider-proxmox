@@ -85,12 +85,34 @@ func resourceLxc() *schema.Resource {
 				Required:    true,
 				Description: "The Rootfs of lxc container",
 			},
-			"net": {
-				Type:        schema.TypeList,
-				Required:    true,
-				Description: "The network of lxc container",
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
+			"network": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"name": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+
+						"bridge": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+
+						"gw": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"ip": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"firewall": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+					},
 				},
 			},
 		},
@@ -126,6 +148,8 @@ func resourceLxcCreate(d *schema.ResourceData, m interface{}) error {
 	} else {
 		start = "0"
 	}
+	//
+
 	data := client.Lxc{
 		VMID:         vmid,
 		Ostemplate:   d.Get("ostemplate").(string),
@@ -141,8 +165,9 @@ func resourceLxcCreate(d *schema.ResourceData, m interface{}) error {
 		Searchdomain: d.Get("searchdomain").(string),
 		Nameserver:   d.Get("nameserver").(string),
 		Rootfs:       d.Get("rootfs").(string),
-		Net:          d.Get("net").(interface{}),
+		Net:          d.Get("network").(*schema.Set).List(),
 	}
+
 	d.SetId(vmid)
 	err = apiClient.CreateLxc(data)
 	if err != nil {
@@ -209,6 +234,15 @@ func resourceLxcRead(d *schema.ResourceData, m interface{}) error {
 			return err
 		}
 	}
+
+	//tmp чтение интерфейса но там маска подсети которую мы не указываем стоит игнорировать этот параметр.
+	//var netSlice []interface{}
+	//netSlice = append(netSlice,stat.Data.Net0)
+	//
+	//err = d.Set("net", netSlice)
+	//if err != nil {
+	//	return err
+	//}
 
 	apiClient.Cond.L.Unlock()
 	return nil

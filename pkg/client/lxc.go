@@ -2,8 +2,8 @@ package client
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/VictoriaMetrics/VictoriaMetrics/lib/logger"
-	"reflect"
 	"time"
 )
 
@@ -63,22 +63,24 @@ type Lxc struct {
 	Searchdomain string
 	Nameserver   string
 	Rootfs       string
-	Net          interface{}
+	Net          []interface{}
 }
 
 func (api *API) CreateLxc(data Lxc) error {
 	time.Sleep(time.Second * 2)
 
-	s := reflect.ValueOf(data.Net)
-	if s.Kind() != reflect.Slice {
-		logger.Fatalf("err")
-	}
+	//logger.Infof(" TEST: %s %v", data.Net.List(),"\n" )
 
-	ret := make([]interface{}, s.Len())
-
-	for i := 0; i < s.Len(); i++ {
-		ret[i] = s.Index(i).Interface()
-	}
+	//s := reflect.ValueOf(data.Net)
+	//if s.Kind() != reflect.Slice {
+	//	logger.Fatalf("err")
+	//}
+	//
+	//ret := make([]interface{}, s.Len())
+	//
+	//for i := 0; i < s.Len(); i++ {
+	//	ret[i] = s.Index(i).Interface()
+	//}
 
 	options := map[string]string{
 		"ostemplate":   data.Ostemplate,
@@ -94,7 +96,6 @@ func (api *API) CreateLxc(data Lxc) error {
 		"searchdomain": data.Searchdomain,
 		"nameserver":   data.Nameserver,
 		"rootfs":       data.Rootfs,
-		"net0":         ret[0].(string),
 	}
 	path := "/nodes/" + data.Node + "/lxc"
 	err := api.post(path, options)
@@ -102,6 +103,11 @@ func (api *API) CreateLxc(data Lxc) error {
 		return err
 	}
 	logger.Infof("create lxc %s", string(api.resp))
+
+	err = api.ConfigLXCUpdateNetwork(data)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -180,7 +186,6 @@ func (api *API) checkLxc(node string, vmid string) (bool, error) {
 		logger.Infof(" no found lxc id:%s", vmid)
 		return true, nil
 	}
-
 	return false, nil
 }
 
@@ -297,5 +302,27 @@ func (api *API) resizeLXC(data ConfigLXCUpdate) error {
 		return err
 	}
 	logger.Infof("disk lxc update %s", string(api.resp))
+	return nil
+}
+
+func (api *API) ConfigLXCUpdateNetwork(data Lxc) error {
+	//logger.Infof("%s", data.Net)
+	var res string
+	for k, v := range data.Net {
+		logger.Infof("%v,%v", k, v)
+		//res += k + "=" + v + ","
+	}
+	fmt.Println(res)
+	path := "/nodes/" + data.Node + "/lxc/" + data.VMID + "/config"
+	options := map[string]string{
+		"net0": res,
+	}
+
+	err := api.put(path, options)
+	if err != nil {
+		return err
+	}
+	logger.Infof("config lxc update network %s", string(api.resp))
+
 	return nil
 }

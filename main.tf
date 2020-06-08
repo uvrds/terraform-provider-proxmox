@@ -27,9 +27,13 @@ resource "proxmox_lxc" "test" {
   nameserver = "192.168.1.1"
   rootfs = "22"
   #size disk 10G
-  net = [
-    "name=eth0,bridge=vmbr0,gw=192.168.122.1,ip=192.168.122.80/24,firewall=1"
-  ]
+  network {
+    name = "eth0"
+    bridge = "vmbr0"
+    gw = "192.169.122.1"
+    ip = "192.169.122.80/24"
+    firewall = "1"
+  }
   //  count = 10
 }
 
