@@ -38,7 +38,6 @@ func main() {
 		Searchdomain: "noprod.srv.crpt.tech crpt.tech o.crpt.tech",
 		Nameserver:   "10.73.70.141 10.73.69.11",
 		Rootfs:       "10",
-		Net:          Netmap,
 	}
 	fmt.Println(Netmap)
 	//t.CreateLxc(data)

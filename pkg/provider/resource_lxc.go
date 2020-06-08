@@ -112,6 +112,10 @@ func resourceLxc() *schema.Resource {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
+						"gw6": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
 					},
 				},
 			},

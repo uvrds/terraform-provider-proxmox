@@ -68,20 +68,6 @@ type Lxc struct {
 
 func (api *API) CreateLxc(data Lxc) error {
 	time.Sleep(time.Second * 2)
-
-	//logger.Infof(" TEST: %s %v", data.Net.List(),"\n" )
-
-	//s := reflect.ValueOf(data.Net)
-	//if s.Kind() != reflect.Slice {
-	//	logger.Fatalf("err")
-	//}
-	//
-	//ret := make([]interface{}, s.Len())
-	//
-	//for i := 0; i < s.Len(); i++ {
-	//	ret[i] = s.Index(i).Interface()
-	//}
-
 	options := map[string]string{
 		"ostemplate":   data.Ostemplate,
 		"vmid":         data.VMID,
@@ -310,6 +296,9 @@ func (api *API) ConfigLXCUpdateNetwork(data Lxc) error {
 	options := make(map[string]string)
 	for k, v := range data.Net {
 		for key, value := range v.(map[string]interface{}) {
+			if value.(string) == "" {
+				continue
+			}
 			res += key + "=" + value.(string) + ","
 		}
 		logger.Infof("KEY: %s", k)
@@ -317,11 +306,6 @@ func (api *API) ConfigLXCUpdateNetwork(data Lxc) error {
 		res = ""
 	}
 	logger.Infof("options: %s", options)
-
-	//options := map[string]string{
-	//	"net0": "name=eth0,bridge=vmbr0,gw=192.169.122.1,ip=192.169.122.80/24,firewall=1",
-	//	"net1": "name=eth1,bridge=vmbr0,gw=192.169.122.1,ip=192.169.122.85/24,firewall=1",
-	//}
 	path := "/nodes/" + data.Node + "/lxc/" + data.VMID + "/config"
 	err := api.put(path, options)
 	if err != nil {
