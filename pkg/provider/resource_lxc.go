@@ -187,7 +187,7 @@ func resourceLxcCreate(d *schema.ResourceData, m interface{}) error {
 		Searchdomain: d.Get("searchdomain").(string),
 		Nameserver:   d.Get("nameserver").(string),
 		Rootfs:       d.Get("rootfs").(string),
-		Net:          d.Get("network").(*schema.Set).List(),
+		Net:          d.Get("network").(*schema.Set),
 	}
 
 	d.SetId(vmid)
@@ -211,7 +211,7 @@ func resourceLxcRead(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		return err
 	}
-	var stat client.ConfigLXC
+	var stat client.ReadConfigLXC
 	err = json.Unmarshal(resp, &stat)
 	if err != nil {
 		return err
@@ -256,15 +256,6 @@ func resourceLxcRead(d *schema.ResourceData, m interface{}) error {
 			return err
 		}
 	}
-
-	//tmp чтение интерфейса но там маска подсети которую мы не указываем стоит игнорировать этот параметр.
-	//var netSlice []interface{}
-	//netSlice = append(netSlice,stat.Data.Net0)
-	//
-	//err = d.Set("net", netSlice)
-	//if err != nil {
-	//	return err
-	//}
 
 	apiClient.Cond.L.Unlock()
 	return nil

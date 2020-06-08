@@ -3,6 +3,7 @@ package client
 import (
 	"encoding/json"
 	"github.com/VictoriaMetrics/VictoriaMetrics/lib/logger"
+	"github.com/hashicorp/terraform/helper/schema"
 	"strconv"
 	"time"
 )
@@ -63,7 +64,7 @@ type Lxc struct {
 	Searchdomain string
 	Nameserver   string
 	Rootfs       string
-	Net          []interface{}
+	Net          *schema.Set
 }
 
 func (api *API) CreateLxc(data Lxc) error {
@@ -211,7 +212,7 @@ func (api *API) CloneLxc(data LxcClone) error {
 	return nil
 }
 
-type ConfigLXC struct {
+type ReadConfigLXC struct {
 	Data struct {
 		Rootfs       string `json:"rootfs"`
 		Swap         int    `json:"swap"`
@@ -227,6 +228,9 @@ type ConfigLXC struct {
 		Lock         string `json:"lock"`
 		Net0         string `json:"net0"`
 	} `json:"data"`
+}
+
+type ReadNetwork struct {
 }
 
 func (api *API) ReadConfigLXC(node string, id string) ([]byte, error) {
@@ -294,14 +298,13 @@ func (api *API) resizeLXC(data ConfigLXCUpdate) error {
 func (api *API) ConfigLXCUpdateNetwork(data Lxc) error {
 	var res string
 	options := make(map[string]string)
-	for k, v := range data.Net {
+	for k, v := range data.Net.List() {
 		for key, value := range v.(map[string]interface{}) {
 			if value.(string) == "" {
 				continue
 			}
 			res += key + "=" + value.(string) + ","
 		}
-		logger.Infof("KEY: %s", k)
 		options["net"+strconv.Itoa(k)] += res
 		res = ""
 	}
