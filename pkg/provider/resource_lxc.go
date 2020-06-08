@@ -116,6 +116,34 @@ func resourceLxc() *schema.Resource {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
+						"hwaddr": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"ip6": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"mtu": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"rate": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"tag": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"trunks": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"type": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
 					},
 				},
 			},
