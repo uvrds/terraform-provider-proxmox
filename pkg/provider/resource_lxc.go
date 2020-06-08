@@ -65,10 +65,10 @@ func resourceLxc() *schema.Resource {
 				Description: "The password root",
 			},
 			"start": {
-				Type:        schema.TypeBool,
+				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "The start of lxc container",
-				Default:     true,
+				Default:     "1",
 			},
 			"searchdomain": {
 				Type:        schema.TypeString,

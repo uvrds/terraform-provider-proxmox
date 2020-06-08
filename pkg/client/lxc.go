@@ -2,8 +2,8 @@ package client
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/VictoriaMetrics/VictoriaMetrics/lib/logger"
+	"strconv"
 	"time"
 )
 
@@ -306,18 +306,23 @@ func (api *API) resizeLXC(data ConfigLXCUpdate) error {
 }
 
 func (api *API) ConfigLXCUpdateNetwork(data Lxc) error {
-	//logger.Infof("%s", data.Net)
 	var res string
+	options := make(map[string]string)
 	for k, v := range data.Net {
-		logger.Infof("%v,%v", k, v)
-		//res += k + "=" + v + ","
+		for key, value := range v.(map[string]interface{}) {
+			res += key + "=" + value.(string) + ","
+		}
+		logger.Infof("KEY: %s", k)
+		options["net"+strconv.Itoa(k)] += res
+		res = ""
 	}
-	fmt.Println(res)
-	path := "/nodes/" + data.Node + "/lxc/" + data.VMID + "/config"
-	options := map[string]string{
-		"net0": res,
-	}
+	logger.Infof("options: %s", options)
 
+	//options := map[string]string{
+	//	"net0": "name=eth0,bridge=vmbr0,gw=192.169.122.1,ip=192.169.122.80/24,firewall=1",
+	//	"net1": "name=eth1,bridge=vmbr0,gw=192.169.122.1,ip=192.169.122.85/24,firewall=1",
+	//}
+	path := "/nodes/" + data.Node + "/lxc/" + data.VMID + "/config"
 	err := api.put(path, options)
 	if err != nil {
 		return err

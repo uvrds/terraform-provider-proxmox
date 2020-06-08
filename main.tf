@@ -21,12 +21,12 @@ resource "proxmox_lxc" "test" {
   description = "test2"
   password = "asdqz123"
   #старт машины при создании
-  start = true
+  #start = "1"
   swap = "0"
   searchdomain = "noprod.srv.crpt.tech"
   nameserver = "192.168.1.1"
-  rootfs = "22"
   #size disk 10G
+  rootfs = "22"
   network {
     name = "eth0"
     bridge = "vmbr0"
@@ -34,6 +34,7 @@ resource "proxmox_lxc" "test" {
     ip = "192.169.122.80/24"
     firewall = "1"
   }
+
   //  count = 10
 }
 
