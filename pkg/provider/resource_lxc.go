@@ -140,16 +140,6 @@ func resourceLxcCreate(d *schema.ResourceData, m interface{}) error {
 			logger.Fatalf(" id not get %s", err)
 		}
 	}
-	//todo написать 1 ф-цию для подобных конструкций
-	var start string
-	f := d.Get("start").(bool)
-	if f {
-		start = "1"
-	} else {
-		start = "0"
-	}
-	//
-
 	data := client.Lxc{
 		VMID:         vmid,
 		Ostemplate:   d.Get("ostemplate").(string),
@@ -159,7 +149,7 @@ func resourceLxcCreate(d *schema.ResourceData, m interface{}) error {
 		Cores:        d.Get("cores").(string),
 		Memory:       d.Get("memory").(string),
 		Description:  d.Get("description").(string),
-		Start:        start,
+		Start:        d.Get("start").(string),
 		Password:     d.Get("password").(string),
 		Swap:         d.Get("swap").(string),
 		Searchdomain: d.Get("searchdomain").(string),
