@@ -110,7 +110,7 @@ func (api *API) Deletelxc(data Lxc) error {
 		if err != nil {
 			return err
 		}
-		b, err := api.checkLxc(data.Node, data.VMID)
+		b, err := api.CheckLxc(data.Node, data.VMID)
 		if err != nil {
 			return err
 		}
@@ -131,7 +131,7 @@ func (api *API) stopLxc(node string, vmid string) error {
 	var s = true
 
 	for s {
-		b, err := api.checkLxc(node, vmid)
+		b, err := api.CheckLxc(node, vmid)
 		if err != nil {
 			return err
 		}
@@ -159,7 +159,7 @@ type CheckLxc struct {
 	Data interface{} `json:"data"`
 }
 
-func (api *API) checkLxc(node string, vmid string) (bool, error) {
+func (api *API) CheckLxc(node string, vmid string) (bool, error) {
 	resp, err := api.StatusLXC(node, vmid)
 	if err != nil {
 		return false, err
@@ -191,6 +191,7 @@ type LxcClone struct {
 	Searchdomain string
 	Nameserver   string
 	Rootfs       string
+	Net          *schema.Set
 }
 
 func (api *API) CloneLxc(data LxcClone) error {
@@ -209,6 +210,27 @@ func (api *API) CloneLxc(data LxcClone) error {
 		return err
 	}
 	logger.Infof("clone lxc %s", string(api.resp))
+	var wait = true
+	for wait {
+		resp, err := api.StatusLXC(data.Node, data.NEWID)
+		if err != nil {
+			return err
+		}
+		var stat StatusLXC
+		err = json.Unmarshal(resp, &stat)
+		if err != nil {
+			return err
+		}
+		time.Sleep(time.Second * 2)
+		logger.Infof("lock: %s", stat.Data.Lock)
+		if stat.Data.Lock == "" {
+			wait = false
+		}
+	}
+	err = api.ConfigLXCUpdateNetwork(data.Net, data.Node, data.NEWID)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -228,9 +250,6 @@ type ReadConfigLXC struct {
 		Lock         string `json:"lock"`
 		Net0         string `json:"net0"`
 	} `json:"data"`
-}
-
-type ReadNetwork struct {
 }
 
 func (api *API) ReadConfigLXC(node string, id string) ([]byte, error) {
@@ -301,6 +320,7 @@ func (api *API) resizeLXC(data ConfigLXCUpdate) error {
 }
 
 func (api *API) ConfigLXCUpdateNetwork(net *schema.Set, node string, vmid string) error {
+	time.Sleep(time.Second * 2)
 	var res string
 	options := make(map[string]string)
 	for k, v := range net.List() {

@@ -1,8 +1,6 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
 	"github.com/terraform-provider-proxmox/pkg/client"
 )
 
@@ -27,25 +25,25 @@ func main() {
 	//	"gw":     "192.168.122.1",
 	//	"ip":     "192.168.122.80/24",
 	//}
-	//data := client.Lxc{
-	//	VMID:         "100",
-	//	Ostemplate:   "local:vztmpl/ubuntu-18.04-standard_18.04.1-1_amd64.tar.gz",
-	//	Storage:      "local-lvm",
-	//	Node:         "pve",
-	//	Hostname:     "test",
-	//	Cores:        "1",
-	//	Memory:       "512",
-	//	Description:  "xeq",
-	//	Start:        "1",
-	//	Password:     "asdqz123",
-	//	Swap:         "0",
-	//	Searchdomain: "noprod.srv.crpt.tech crpt.tech o.crpt.tech",
-	//	Nameserver:   "10.73.70.141 10.73.69.11",
-	//	Rootfs:       "10",
-	//}
+	data := client.Lxc{
+		VMID:         "102",
+		Ostemplate:   "local:vztmpl/ubuntu-18.04-standard_18.04.1-1_amd64.tar.gz",
+		Storage:      "local-lvm",
+		Node:         "pve",
+		Hostname:     "test",
+		Cores:        "1",
+		Memory:       "512",
+		Description:  "xeq",
+		Start:        "1",
+		Password:     "asdqz123",
+		Swap:         "0",
+		Searchdomain: "noprod.srv.crpt.tech crpt.tech o.crpt.tech",
+		Nameserver:   "10.73.70.141 10.73.69.11",
+		Rootfs:       "10",
+	}
 	//fmt.Println(Netmap)
 	////t.CreateLxc(data)
-	//t.ConfigLXCUpdateNetwork(data)
+	t.CheckLxc(data.Node, data.VMID)
 
 	//update
 
@@ -64,16 +62,16 @@ func main() {
 	//t.ConfigLXCUpdate(data)
 
 	//read
-
-	resp, err := t.ReadConfigLXC("pve", "100")
-	if err != nil {
-		fmt.Println(err)
-	}
-	var stat client.ReadConfigLXC
-	err = json.Unmarshal(resp, &stat)
-	if err != nil {
-		fmt.Println(err)
-	}
+	//
+	//resp, err := t.ReadConfigLXC("pve", "102")
+	//if err != nil {
+	//	fmt.Println(err)
+	//}
+	//var stat client.ReadConfigLXC
+	//err = json.Unmarshal(resp, &stat)
+	//if err != nil {
+	//	fmt.Println(err)
+	//}
 
 	//delete
 

@@ -55,10 +55,10 @@ func resourceLxcClone() *schema.Resource {
 				Description: "The description lxc container",
 			},
 			"full": {
-				Type:        schema.TypeBool,
+				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "The full copy storage",
-				Default:     true,
+				Default:     "1",
 			},
 			"swap": {
 				Type:        schema.TypeString,
@@ -80,6 +80,68 @@ func resourceLxcClone() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "The rootfs of lxc container",
+			},
+			"network": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"name": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+
+						"bridge": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+
+						"gw": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"ip": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"firewall": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"gw6": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"hwaddr": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"ip6": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"mtu": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"rate": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"tag": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"trunks": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"type": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+					},
+				},
 			},
 		},
 		Create: resourceCloneCreate,
@@ -108,16 +170,7 @@ func resourceCloneCreate(d *schema.ResourceData, m interface{}) error {
 		if err != nil {
 			logger.Fatalf(" id not get %s", err)
 		}
-
 	}
-	var full string
-	f := d.Get("full").(bool)
-	if f {
-		full = "1"
-	} else {
-		full = "0"
-	}
-
 	data := client.LxcClone{
 		VMID:       d.Get("vm_id_template").(string),
 		NEWID:      vmid,
@@ -125,7 +178,8 @@ func resourceCloneCreate(d *schema.ResourceData, m interface{}) error {
 		Node:       node,
 		TargetNode: targetNode,
 		Hostname:   d.Get("hostname").(string),
-		Full:       full,
+		Full:       d.Get("full").(string),
+		Net:        d.Get("network").(*schema.Set),
 		//todo сделать update после создания
 		Description:  d.Get("description").(string),
 		Cores:        d.Get("cores").(string),
