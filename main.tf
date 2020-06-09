@@ -16,20 +16,32 @@ resource "proxmox_lxc" "test" {
   storage = "local-lvm"
   hostname = "kuber03"
   cores = "1"
-  memory = "523"
   # 1024MB
+  memory = "523"
   description = "test2"
   password = "asdqz123"
-  start = true
   #старт машины при создании
+  #start = "1"
   swap = "0"
   searchdomain = "noprod.srv.crpt.tech"
   nameserver = "192.168.1.1"
-  rootfs = "22"
   #size disk 10G
-  net = [
-    "name=eth0,bridge=vmbr0,gw=192.168.122.1,ip=192.168.122.80/24"
-  ]
+  rootfs = "22"
+  network {
+    name = "eth0"
+    bridge = "vmbr0"
+    gw = "192.169.122.1"
+    ip = "192.169.122.80/24"
+    firewall = "1"
+  }
+  network {
+    name = "eth1"
+    bridge = "vmbr0"
+    gw = "192.169.122.1"
+    ip = "192.169.122.82/24"
+    firewall = "1"
+  }
+
   //  count = 10
 }
 
@@ -48,6 +60,6 @@ resource "proxmox_lxc" "test" {
 //  nameserver = "192.168.1.1 8.8.8.8"
 //  rootfs = "6"
 //net = [
-//  "name=eth0,bridge=vmbr0,gw=192.168.122.1,ip=192.168.122.80/24"
+//  "name=eth0,bridge=vmbr0,gw=192.168.122.1,ip=192.168.122.81/24"
 //]
 //}

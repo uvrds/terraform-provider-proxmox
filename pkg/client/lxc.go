@@ -2,9 +2,9 @@ package client
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/VictoriaMetrics/VictoriaMetrics/lib/logger"
-	"strings"
+	"github.com/hashicorp/terraform/helper/schema"
+	"strconv"
 	"time"
 )
 
@@ -64,17 +64,11 @@ type Lxc struct {
 	Searchdomain string
 	Nameserver   string
 	Rootfs       string
-	Net          interface{}
+	Net          *schema.Set
 }
 
 func (api *API) CreateLxc(data Lxc) error {
 	time.Sleep(time.Second * 2)
-	str := fmt.Sprintf("%s", data.Net)
-	trimR := strings.TrimRight(str, "]")
-	trimL := strings.TrimLeft(trimR, "[")
-
-	//logger.Infof("TEST: %s", trimL)
-
 	options := map[string]string{
 		"ostemplate":   data.Ostemplate,
 		"vmid":         data.VMID,
@@ -89,7 +83,6 @@ func (api *API) CreateLxc(data Lxc) error {
 		"searchdomain": data.Searchdomain,
 		"nameserver":   data.Nameserver,
 		"rootfs":       data.Rootfs,
-		"net0":         trimL,
 	}
 	path := "/nodes/" + data.Node + "/lxc"
 	err := api.post(path, options)
@@ -97,6 +90,11 @@ func (api *API) CreateLxc(data Lxc) error {
 		return err
 	}
 	logger.Infof("create lxc %s", string(api.resp))
+
+	err = api.ConfigLXCUpdateNetwork(data.Net, data.Node, data.VMID)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -175,7 +173,6 @@ func (api *API) checkLxc(node string, vmid string) (bool, error) {
 		logger.Infof(" no found lxc id:%s", vmid)
 		return true, nil
 	}
-
 	return false, nil
 }
 
@@ -215,7 +212,7 @@ func (api *API) CloneLxc(data LxcClone) error {
 	return nil
 }
 
-type ConfigLXC struct {
+type ReadConfigLXC struct {
 	Data struct {
 		Rootfs       string `json:"rootfs"`
 		Swap         int    `json:"swap"`
@@ -229,10 +226,14 @@ type ConfigLXC struct {
 		Searchdomain string `json:"searchdomain"`
 		Nameserver   string `json:"nameserver"`
 		Lock         string `json:"lock"`
+		Net0         string `json:"net0"`
 	} `json:"data"`
 }
 
-func (api *API) ConfigLXC(node string, id string) ([]byte, error) {
+type ReadNetwork struct {
+}
+
+func (api *API) ReadConfigLXC(node string, id string) ([]byte, error) {
 	path := "/nodes/" + node + "/lxc/" + id + "/config"
 	err := api.get(path, nil)
 	if err != nil {
@@ -253,6 +254,7 @@ type ConfigLXCUpdate struct {
 	Searchdomain string
 	Nameserver   string
 	Rootfs       string
+	Net          *schema.Set
 }
 
 func (api *API) ConfigLXCUpdate(data ConfigLXCUpdate) error {
@@ -276,6 +278,10 @@ func (api *API) ConfigLXCUpdate(data ConfigLXCUpdate) error {
 	if err != nil {
 		return err
 	}
+	err = api.ConfigLXCUpdateNetwork(data.Net, data.Node, data.VMID)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -291,5 +297,29 @@ func (api *API) resizeLXC(data ConfigLXCUpdate) error {
 		return err
 	}
 	logger.Infof("disk lxc update %s", string(api.resp))
+	return nil
+}
+
+func (api *API) ConfigLXCUpdateNetwork(net *schema.Set, node string, vmid string) error {
+	var res string
+	options := make(map[string]string)
+	for k, v := range net.List() {
+		for key, value := range v.(map[string]interface{}) {
+			if value.(string) == "" {
+				continue
+			}
+			res += key + "=" + value.(string) + ","
+		}
+		options["net"+strconv.Itoa(k)] += res
+		res = ""
+	}
+	logger.Infof("options: %s", options)
+	path := "/nodes/" + node + "/lxc/" + vmid + "/config"
+	err := api.put(path, options)
+	if err != nil {
+		return err
+	}
+	logger.Infof("config lxc update network %s", string(api.resp))
+
 	return nil
 }

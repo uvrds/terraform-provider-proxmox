@@ -65,10 +65,10 @@ func resourceLxc() *schema.Resource {
 				Description: "The password root",
 			},
 			"start": {
-				Type:        schema.TypeBool,
+				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "The start of lxc container",
-				Default:     true,
+				Default:     "1",
 			},
 			"searchdomain": {
 				Type:        schema.TypeString,
@@ -85,12 +85,66 @@ func resourceLxc() *schema.Resource {
 				Required:    true,
 				Description: "The Rootfs of lxc container",
 			},
-			"net": {
-				Type:        schema.TypeList,
-				Required:    true,
-				Description: "The network of lxc container",
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
+			"network": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"name": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+
+						"bridge": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+
+						"gw": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"ip": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"firewall": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"gw6": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"hwaddr": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"ip6": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"mtu": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"rate": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"tag": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"trunks": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"type": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+					},
 				},
 			},
 		},
@@ -118,16 +172,6 @@ func resourceLxcCreate(d *schema.ResourceData, m interface{}) error {
 			logger.Fatalf(" id not get %s", err)
 		}
 	}
-	//todo написать 1 ф-цию для подобных конструкций
-	var start string
-	f := d.Get("start").(bool)
-	if f {
-		start = "1"
-	} else {
-		start = "0"
-	}
-	//
-
 	data := client.Lxc{
 		VMID:         vmid,
 		Ostemplate:   d.Get("ostemplate").(string),
@@ -137,14 +181,15 @@ func resourceLxcCreate(d *schema.ResourceData, m interface{}) error {
 		Cores:        d.Get("cores").(string),
 		Memory:       d.Get("memory").(string),
 		Description:  d.Get("description").(string),
-		Start:        start,
+		Start:        d.Get("start").(string),
 		Password:     d.Get("password").(string),
 		Swap:         d.Get("swap").(string),
 		Searchdomain: d.Get("searchdomain").(string),
 		Nameserver:   d.Get("nameserver").(string),
 		Rootfs:       d.Get("rootfs").(string),
-		Net:          d.Get("net").(interface{}),
+		Net:          d.Get("network").(*schema.Set),
 	}
+
 	d.SetId(vmid)
 	err = apiClient.CreateLxc(data)
 	if err != nil {
@@ -162,11 +207,11 @@ func resourceLxcRead(d *schema.ResourceData, m interface{}) error {
 	if node == "" {
 
 	}
-	resp, err := apiClient.ConfigLXC(node, d.Id())
+	resp, err := apiClient.ReadConfigLXC(node, d.Id())
 	if err != nil {
 		return err
 	}
-	var stat client.ConfigLXC
+	var stat client.ReadConfigLXC
 	err = json.Unmarshal(resp, &stat)
 	if err != nil {
 		return err
@@ -236,6 +281,7 @@ func resourceLxcUpdate(d *schema.ResourceData, m interface{}) error {
 		Searchdomain: d.Get("searchdomain").(string),
 		Nameserver:   d.Get("nameserver").(string),
 		Rootfs:       d.Get("rootfs").(string),
+		Net:          d.Get("network").(*schema.Set),
 	}
 	err = apiClient.ConfigLXCUpdate(data)
 	if err != nil {
