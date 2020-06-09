@@ -38,7 +38,7 @@ resource "proxmox_lxc" "test" {
     name = "eth1"
     bridge = "vmbr0"
     gw = "192.169.122.1"
-    ip = "192.169.122.81/24"
+    ip = "192.169.122.82/24"
     firewall = "1"
   }
 

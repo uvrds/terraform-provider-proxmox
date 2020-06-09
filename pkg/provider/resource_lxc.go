@@ -281,6 +281,7 @@ func resourceLxcUpdate(d *schema.ResourceData, m interface{}) error {
 		Searchdomain: d.Get("searchdomain").(string),
 		Nameserver:   d.Get("nameserver").(string),
 		Rootfs:       d.Get("rootfs").(string),
+		Net:          d.Get("network").(*schema.Set),
 	}
 	err = apiClient.ConfigLXCUpdate(data)
 	if err != nil {

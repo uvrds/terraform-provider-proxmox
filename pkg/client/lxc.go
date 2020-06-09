@@ -91,7 +91,7 @@ func (api *API) CreateLxc(data Lxc) error {
 	}
 	logger.Infof("create lxc %s", string(api.resp))
 
-	err = api.ConfigLXCUpdateNetwork(data)
+	err = api.ConfigLXCUpdateNetwork(data.Net, data.Node, data.VMID)
 	if err != nil {
 		return err
 	}
@@ -254,6 +254,7 @@ type ConfigLXCUpdate struct {
 	Searchdomain string
 	Nameserver   string
 	Rootfs       string
+	Net          *schema.Set
 }
 
 func (api *API) ConfigLXCUpdate(data ConfigLXCUpdate) error {
@@ -277,6 +278,10 @@ func (api *API) ConfigLXCUpdate(data ConfigLXCUpdate) error {
 	if err != nil {
 		return err
 	}
+	err = api.ConfigLXCUpdateNetwork(data.Net, data.Node, data.VMID)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -295,10 +300,10 @@ func (api *API) resizeLXC(data ConfigLXCUpdate) error {
 	return nil
 }
 
-func (api *API) ConfigLXCUpdateNetwork(data Lxc) error {
+func (api *API) ConfigLXCUpdateNetwork(net *schema.Set, node string, vmid string) error {
 	var res string
 	options := make(map[string]string)
-	for k, v := range data.Net.List() {
+	for k, v := range net.List() {
 		for key, value := range v.(map[string]interface{}) {
 			if value.(string) == "" {
 				continue
@@ -309,7 +314,7 @@ func (api *API) ConfigLXCUpdateNetwork(data Lxc) error {
 		res = ""
 	}
 	logger.Infof("options: %s", options)
-	path := "/nodes/" + data.Node + "/lxc/" + data.VMID + "/config"
+	path := "/nodes/" + node + "/lxc/" + vmid + "/config"
 	err := api.put(path, options)
 	if err != nil {
 		return err
