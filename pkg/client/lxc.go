@@ -156,14 +156,16 @@ func (api *API) stopLxc(node string, vmid string) error {
 }
 
 func (api *API) startLxc(node string, vmid string) error {
-	path := "/nodes/" + node + "/lxc/" + vmid + "/status/start"
-	err := api.post(path, nil)
-	if err != nil {
-		return err
-	}
+
 	var s = true
 
 	for s {
+		path := "/nodes/" + node + "/lxc/" + vmid + "/status/start"
+		err := api.post(path, nil)
+		if err != nil {
+			return err
+		}
+
 		b, err := api.CheckLxc(node, vmid)
 		if err != nil {
 			return err
@@ -260,11 +262,28 @@ func (api *API) CloneLxc(data LxcClone) error {
 			wait = false
 		}
 	}
-	err = api.ConfigLXCUpdateNetwork(data.Net, data.Node, data.NEWID)
+	//err = api.ConfigLXCUpdateNetwork(data.Net, data.Node, data.NEWID)
+	//if err != nil {
+	//	return err
+	//}
+
+	DataClone := ConfigLXCUpdate{
+		VMID:         data.NEWID,
+		Node:         data.Node,
+		Hostname:     data.Hostname,
+		Description:  data.Description,
+		Cores:        data.Cores,
+		Memory:       data.Memory,
+		Swap:         data.Swap,
+		Searchdomain: data.Searchdomain,
+		Nameserver:   data.Nameserver,
+		Rootfs:       data.Rootfs,
+		Net:          data.Net,
+	}
+	err = api.ConfigLXCUpdate(DataClone)
 	if err != nil {
 		return err
 	}
-
 	err = api.startLxc(data.Node, data.NEWID)
 	if err != nil {
 		return err

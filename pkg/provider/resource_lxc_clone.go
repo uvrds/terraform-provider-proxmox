@@ -172,15 +172,14 @@ func resourceCloneCreate(d *schema.ResourceData, m interface{}) error {
 		}
 	}
 	data := client.LxcClone{
-		VMID:       d.Get("vm_id_template").(string),
-		NEWID:      vmid,
-		Storage:    d.Get("storage").(string),
-		Node:       node,
-		TargetNode: targetNode,
-		Hostname:   d.Get("hostname").(string),
-		Full:       d.Get("full").(string),
-		Net:        d.Get("network").(*schema.Set),
-		//todo сделать update после создания
+		VMID:         d.Get("vm_id_template").(string),
+		NEWID:        vmid,
+		Storage:      d.Get("storage").(string),
+		Node:         node,
+		TargetNode:   targetNode,
+		Hostname:     d.Get("hostname").(string),
+		Full:         d.Get("full").(string),
+		Net:          d.Get("network").(*schema.Set),
 		Description:  d.Get("description").(string),
 		Cores:        d.Get("cores").(string),
 		Memory:       d.Get("memory").(string),
