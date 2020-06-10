@@ -59,11 +59,11 @@ resource "proxmox_lxc_clone" "test" {
   searchdomain = "noprod.srv.crpt.tech crpt.tech o.crpt.tech"
   nameserver = "192.168.1.1 8.8.8.8"
   rootfs = "6"
-//  network {
-//    name = "eth0"
-//    bridge = "vmbr0"
-//    gw = "192.169.122.1"
-//    ip = "192.169.122.85/24"
-//    firewall = "0"
-//  }
+  network {
+    name = "eth0"
+    bridge = "vmbr0"
+    gw = "192.169.122.1"
+    ip = "192.169.122.85/24"
+    firewall = "0"
+  }
 }

@@ -155,6 +155,39 @@ func (api *API) stopLxc(node string, vmid string) error {
 	return nil
 }
 
+func (api *API) startLxc(node string, vmid string) error {
+	path := "/nodes/" + node + "/lxc/" + vmid + "/status/start"
+	err := api.post(path, nil)
+	if err != nil {
+		return err
+	}
+	var s = true
+
+	for s {
+		b, err := api.CheckLxc(node, vmid)
+		if err != nil {
+			return err
+		}
+		if b {
+			s = false
+		}
+		resp, err := api.StatusLXC(node, vmid)
+		if err != nil {
+			return err
+		}
+		var stat StatusLXC
+		err = json.Unmarshal(resp, &stat)
+		if err != nil {
+			return err
+		}
+		if stat.Data.Status == "running" {
+			logger.Infof("start lxc id:%s %s", vmid, string(api.resp))
+			s = false
+		}
+	}
+	return nil
+}
+
 type CheckLxc struct {
 	Data interface{} `json:"data"`
 }
@@ -228,6 +261,10 @@ func (api *API) CloneLxc(data LxcClone) error {
 		}
 	}
 	err = api.ConfigLXCUpdateNetwork(data.Net, data.Node, data.NEWID)
+	if err != nil {
+		return err
+	}
+	err = api.startLxc(data.Node, data.NEWID)
 	if err != nil {
 		return err
 	}
