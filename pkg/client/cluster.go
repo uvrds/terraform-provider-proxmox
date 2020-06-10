@@ -21,6 +21,11 @@ func (api *API) NextId() (string, error) {
 	return id.Data, nil
 }
 
+func (api *API) searchLxc(node string, vmid string) error {
+
+	return nil
+}
+
 type Cluster struct {
 	Data []struct {
 		Name string `json:"name"`

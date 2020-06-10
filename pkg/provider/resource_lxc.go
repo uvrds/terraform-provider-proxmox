@@ -236,7 +236,9 @@ func resourceLxcRead(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		return err
 	}
-	err = d.Set("description", stat.Data.Description)
+
+	description := strings.TrimSuffix(stat.Data.Description, "\n")
+	err = d.Set("description", description)
 	if err != nil {
 		return err
 	}
