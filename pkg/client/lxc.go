@@ -264,6 +264,7 @@ func (api *API) CloneLxc(data LxcClone) error {
 	if err != nil {
 		return err
 	}
+
 	err = api.startLxc(data.Node, data.NEWID)
 	if err != nil {
 		return err
@@ -377,6 +378,11 @@ func (api *API) ConfigLXCUpdateNetwork(net *schema.Set, node string, vmid string
 		return err
 	}
 	logger.Infof("config lxc update network %s", string(api.resp))
+
+	return nil
+}
+
+func (api *API) update(node string, vmid string) error {
 
 	return nil
 }
