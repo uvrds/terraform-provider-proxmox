@@ -400,8 +400,3 @@ func (api *API) ConfigLXCUpdateNetwork(net *schema.Set, node string, vmid string
 
 	return nil
 }
-
-func (api *API) update(node string, vmid string) error {
-
-	return nil
-}

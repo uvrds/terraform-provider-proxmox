@@ -43,7 +43,7 @@ resource "proxmox_lxc_clone" "test" {
   taget_node = "pve"
   storage = "local-lvm"
   hostname = "kuber04"
-  cores = "1"
+  cores = "2"
   memory = "1024"
   # 1024MB
   swap = "0"
