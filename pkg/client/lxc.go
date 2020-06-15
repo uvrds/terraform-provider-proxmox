@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/VictoriaMetrics/VictoriaMetrics/lib/logger"
 	"github.com/hashicorp/terraform/helper/schema"
+	"log"
 	"strconv"
 	"time"
 )
@@ -230,6 +231,11 @@ type LxcClone struct {
 }
 
 func (api *API) CloneLxc(data LxcClone) error {
+	//migrate template on node for clone
+	err := api.LxcMigrate(data)
+	if err != nil {
+		return err
+	}
 
 	options := map[string]string{
 		"newid":       data.NEWID,
@@ -239,8 +245,8 @@ func (api *API) CloneLxc(data LxcClone) error {
 		"description": data.Description,
 		"target":      data.TargetNode,
 	}
-	path := "/nodes/" + data.Node + "/lxc/" + data.VMID + "/clone"
-	err := api.post(path, options)
+	path := "/nodes/" + data.TargetNode + "/lxc/" + data.VMID + "/clone"
+	err = api.post(path, options)
 	if err != nil {
 		return err
 	}
@@ -315,7 +321,7 @@ func (api *API) ReadConfigLXC(node string, id string) ([]byte, error) {
 	if err != nil {
 		return api.resp, err
 	}
-	logger.Infof("config lxc %s", string(api.resp))
+	logger.Infof("read config lxc %s", string(api.resp))
 	return api.resp, nil
 }
 
@@ -399,4 +405,78 @@ func (api *API) ConfigLXCUpdateNetwork(net *schema.Set, node string, vmid string
 	logger.Infof("config lxc update network %s", string(api.resp))
 
 	return nil
+}
+
+//search lxc on nodes
+type LxcVmid struct {
+	Data []struct {
+		Subdir string `json:"subdir"`
+	} `json:"data"`
+}
+
+func (api *API) lxcVmid(node string, vmid string) (bool, error) {
+	path := "/nodes/" + node + "/lxc/" + vmid
+	err := api.get(path, nil)
+	if err != nil {
+		return false, err
+	}
+	logger.Infof("search lxc id:%s on node:%s", vmid, node)
+
+	var stat LxcVmid
+	err = json.Unmarshal(api.resp, &stat)
+	if err != nil {
+		return false, err
+	}
+	if stat.Data != nil {
+		logger.Infof("found lxc id:%s on node:%s", vmid, node)
+		return true, nil
+	}
+	logger.Infof("no found lxc id:%s on node:%s", vmid, node)
+	return false, nil
+}
+
+func (api *API) LxcMigrate(data LxcClone) error {
+	node, err := api.GetNodeTemplateLxc(data)
+	if err != nil {
+		return err
+	}
+	path := "/nodes/" + data.Node + "/lxc/" + data.VMID + "/migrate"
+	options := map[string]string{
+		"node":   node,
+		"target": data.TargetNode,
+		"vmid":   data.VMID,
+	}
+	err = api.post(path, options)
+	if err != nil {
+		return err
+	}
+	logger.Infof("migrate template on node:%s", data.TargetNode)
+
+	return nil
+}
+
+func (api *API) GetNodeTemplateLxc(data LxcClone) (string, error) {
+
+	var nodes []string
+	var tnode string
+	resp, err := api.Nodes()
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, v := range resp.Data {
+		nodes = append(nodes, v.Node)
+	}
+	for _, v := range nodes {
+		b, err := api.lxcVmid(v, data.VMID)
+		if err != nil {
+			log.Fatal(err)
+		}
+		if b == true {
+			tnode = v
+			break
+		}
+	}
+	logger.Infof("node template:%s", tnode)
+
+	return tnode, nil
 }

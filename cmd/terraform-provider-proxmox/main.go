@@ -1,20 +1,48 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/terraform-provider-proxmox/pkg/client"
+	"log"
+)
 
 func main() {
 
 	//test shema
 
 	//
-	/*BaseURL := "https://192.168.122.54:8006/api2/json"
-	Username := "root@pam"
-	Password := "asdqz123"*/
-	//BaseURL := "*"
-	//Username := "vfrolov@pam"
-	//Password := "*"
+	/*	BaseURL := "https://192.168.122.54:8006/api2/json"
+		Username := "root@pam"
+		Password := "asdqz123"*/
+	BaseURL := "https://proxmox03.noprod.srv.crpt.tech:8006/api2/json"
+	Username := "vfrolov@pam"
+	Password := "*"
 
-	///	t := client.NewClient(BaseURL, Username, Password, true)
+	t := client.NewClient(BaseURL, Username, Password, true)
+
+	//get nodes
+	var nodes []string
+	var tnode string
+	resp, err := t.Nodes()
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, v := range resp.Data {
+		nodes = append(nodes, v.Node)
+	}
+	for _, v := range nodes {
+		b, err := t.LxcVmid(v, "105")
+		if err != nil {
+			log.Fatal(err)
+		}
+		if b == true {
+			tnode = v
+			break
+		}
+	}
+
+	fmt.Println(tnode)
+	//40 minutes
 	/*	id, err := t.NextId()
 		fmt.Println(err)*/
 	//Netmap := map[string]string{
@@ -91,5 +119,4 @@ func main() {
 	//}
 	//t.Deletelxc(data)
 
-	fmt.Println('\t')
 }
