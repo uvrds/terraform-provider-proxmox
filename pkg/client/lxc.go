@@ -262,10 +262,10 @@ func (api *API) CloneLxc(data LxcClone) error {
 			wait = false
 		}
 	}
-	//err = api.ConfigLXCUpdateNetwork(data.Net, data.Node, data.NEWID)
-	//if err != nil {
-	//	return err
-	//}
+	err = api.ConfigLXCUpdateNetwork(data.Net, data.Node, data.NEWID)
+	if err != nil {
+		return err
+	}
 
 	DataClone := ConfigLXCUpdate{
 		VMID:         data.NEWID,
@@ -335,17 +335,17 @@ type ConfigLXCUpdate struct {
 
 func (api *API) ConfigLXCUpdate(data ConfigLXCUpdate) error {
 
-	path := "/nodes/" + data.Node + "/lxc/" + data.VMID + "/config" +
-		"?hostname=" + data.Hostname +
-		"&cores=" + data.Cores +
-		"&memory=" + data.Memory +
-		"&description=" + data.Description +
-		"&swap=" + data.Swap +
-		//todo вынести в отдельную ф-ции т.к. требуется перезапуск хоста.
-		"&searchdomain=" + data.Searchdomain +
-		"&nameserver=" + data.Nameserver
-
-	err := api.put(path, nil)
+	path := "/nodes/" + data.Node + "/lxc/" + data.VMID + "/config"
+	options := map[string]string{
+		"hostname":     data.Hostname,
+		"cores":        data.Cores,
+		"memory":       data.Memory,
+		"swap":         data.Swap,
+		"description":  data.Description,
+		"searchdomain": data.Searchdomain,
+		"nameserver":   data.Nameserver,
+	}
+	err := api.put(path, options)
 	if err != nil {
 		return err
 	}
