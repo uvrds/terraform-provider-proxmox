@@ -56,7 +56,6 @@ func providerResources() map[string]*schema.Resource {
 	return map[string]*schema.Resource{
 		"proxmox_ipam_prefixes": resourceIPAMPrefixes(),
 		"proxmox_lxc":           resourceLxc(),
-		"proxmox_lxc_clone":     resourceLxcClone(),
 	}
 }
 
