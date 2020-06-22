@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/VictoriaMetrics/VictoriaMetrics/lib/logger"
 	"github.com/hashicorp/terraform/helper/schema"
+	"log"
 	"strconv"
 	"time"
 )
@@ -400,3 +401,60 @@ func (api *API) ConfigLXCUpdateNetwork(net *schema.Set, node string, vmid string
 
 	return nil
 }
+
+//search template id on nodes
+
+func (api *API) GetNodeTemplateLxc(vmid string) (string, error) {
+
+	var nodes []string
+	var tnode string
+	resp, err := api.Nodes()
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, v := range resp.Data {
+		nodes = append(nodes, v.Node)
+	}
+	for _, v := range nodes {
+		b, err := api.lxcVmid(v, vmid)
+		if err != nil {
+			log.Fatal(err)
+		}
+		if b == true {
+			tnode = v
+			break
+		}
+	}
+	logger.Infof("node template:%s", tnode)
+
+	return tnode, nil
+}
+
+type LxcVmid struct {
+	Data []struct {
+		Subdir string `json:"subdir"`
+	} `json:"data"`
+}
+
+func (api *API) lxcVmid(node string, vmid string) (bool, error) {
+	path := "/nodes/" + node + "/lxc/" + vmid
+	err := api.get(path, nil)
+	if err != nil {
+		return false, err
+	}
+	logger.Infof("search lxc id:%s on node:%s", vmid, node)
+
+	var stat LxcVmid
+	err = json.Unmarshal(api.resp, &stat)
+	if err != nil {
+		return false, err
+	}
+	if stat.Data != nil {
+		logger.Infof("found lxc id:%s on node:%s", vmid, node)
+		return true, nil
+	}
+	logger.Infof("no found lxc id:%s on node:%s", vmid, node)
+	return false, nil
+}
+
+//

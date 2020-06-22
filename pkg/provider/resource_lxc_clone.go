@@ -19,11 +19,6 @@ func resourceLxcClone() *schema.Resource {
 				Optional:    true,
 				Description: "The id of lxc container",
 			},
-			"taget_node": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "The full copy storage",
-			},
 			"vm_id_template": {
 				Type:        schema.TypeString,
 				Required:    true,
@@ -151,19 +146,25 @@ func resourceLxcClone() *schema.Resource {
 	}
 }
 
+var nodeGlobal string
+
 func resourceCloneCreate(d *schema.ResourceData, m interface{}) error {
 	var err error
 
 	apiClient := m.(*Client).proxmox
 	apiClient.Cond.L.Lock()
-	node := d.Get("node").(string)
-	if node == "" {
-
+	nodeT, err := apiClient.GetNodeTemplateLxc(d.Get("vm_id_template").(string))
+	if err != nil {
+		return err
 	}
-	targetNode := d.Get("taget_node").(string)
+
+	targetNode := d.Get("node").(string)
+	//Здесь должен выдать нам ноду ресурсменеджер
 	if targetNode == "" {
 
 	}
+	nodeGlobal = targetNode
+
 	vmid := d.Get("vmid").(string)
 	if vmid == "" {
 		vmid, err = apiClient.NextId()
@@ -175,7 +176,7 @@ func resourceCloneCreate(d *schema.ResourceData, m interface{}) error {
 		VMID:         d.Get("vm_id_template").(string),
 		NEWID:        vmid,
 		Storage:      d.Get("storage").(string),
-		Node:         node,
+		Node:         nodeT,
 		TargetNode:   targetNode,
 		Hostname:     d.Get("hostname").(string),
 		Full:         d.Get("full").(string),
