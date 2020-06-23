@@ -106,6 +106,7 @@ func (api *API) Deletelxc(data Lxc) error {
 	}
 	var s = true
 	for s {
+		time.Sleep(time.Second * 5)
 		path := "/nodes/" + data.Node + "/lxc/" + data.VMID + "?purge=1"
 		err = api.del(path, nil)
 		if err != nil {
