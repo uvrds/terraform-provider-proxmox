@@ -250,6 +250,7 @@ func resourceLxcRead(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		return err
 	}
+	//данные о диски нужно переделать также как с сетью
 	if stat.Data.Lock != "create" {
 		spl := strings.Split(stat.Data.Rootfs, "=")
 		re := regexp.MustCompile("[0-9]+")
