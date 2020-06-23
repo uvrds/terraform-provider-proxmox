@@ -240,7 +240,7 @@ func (api *API) CloneLxc(data LxcClone) error {
 		"description": data.Description,
 		"target":      data.TargetNode,
 	}
-	path := "/nodes/" + data.Node + "/lxc/" + data.VMID + "/clone"
+	path := "/nodes/" + data.TargetNode + "/lxc/" + data.VMID + "/clone"
 	err := api.post(path, options)
 	if err != nil {
 		return err
@@ -248,7 +248,7 @@ func (api *API) CloneLxc(data LxcClone) error {
 	logger.Infof("clone lxc %s", string(api.resp))
 	var wait = true
 	for wait {
-		resp, err := api.StatusLXC(data.Node, data.NEWID)
+		resp, err := api.StatusLXC(data.TargetNode, data.NEWID)
 		if err != nil {
 			return err
 		}
@@ -263,14 +263,14 @@ func (api *API) CloneLxc(data LxcClone) error {
 			wait = false
 		}
 	}
-	err = api.ConfigLXCUpdateNetwork(data.Net, data.Node, data.NEWID)
+	err = api.ConfigLXCUpdateNetwork(data.Net, data.TargetNode, data.NEWID)
 	if err != nil {
 		return err
 	}
 
 	DataClone := ConfigLXCUpdate{
 		VMID:         data.NEWID,
-		Node:         data.Node,
+		Node:         data.TargetNode,
 		Hostname:     data.Hostname,
 		Description:  data.Description,
 		Cores:        data.Cores,
@@ -285,7 +285,7 @@ func (api *API) CloneLxc(data LxcClone) error {
 	if err != nil {
 		return err
 	}
-	err = api.startLxc(data.Node, data.NEWID)
+	err = api.startLxc(data.TargetNode, data.NEWID)
 	if err != nil {
 		return err
 	}
@@ -458,3 +458,16 @@ func (api *API) lxcVmid(node string, vmid string) (bool, error) {
 }
 
 //
+// migrate template
+func (api *API) LxcMigrate(data LxcClone) error {
+
+	path := "/nodes/" + data.Node + "/lxc/" + data.VMID + "/migrate?target=" + data.TargetNode
+	err := api.post(path, nil)
+	if err != nil {
+		return err
+	}
+	time.Sleep(time.Second * 5)
+	logger.Infof("migrate template on node:%s", data.TargetNode)
+
+	return nil
+}

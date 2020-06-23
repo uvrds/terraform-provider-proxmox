@@ -146,8 +146,6 @@ func resourceLxcClone() *schema.Resource {
 	}
 }
 
-var nodeGlobal string
-
 func resourceCloneCreate(d *schema.ResourceData, m interface{}) error {
 	var err error
 
@@ -163,7 +161,6 @@ func resourceCloneCreate(d *schema.ResourceData, m interface{}) error {
 	if targetNode == "" {
 
 	}
-	nodeGlobal = targetNode
 
 	vmid := d.Get("vmid").(string)
 	if vmid == "" {
@@ -191,6 +188,10 @@ func resourceCloneCreate(d *schema.ResourceData, m interface{}) error {
 	}
 
 	d.SetId(vmid)
+	err = apiClient.LxcMigrate(data)
+	if err != nil {
+		return err
+	}
 	err = apiClient.CloneLxc(data)
 	if err != nil {
 		return err
