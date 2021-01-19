@@ -64,7 +64,7 @@ type Cookie struct {
 type AuthNull struct {
 	Data interface{} `json:"data"`
 }
-
+//todo move to provider
 func (api *API) req(data Data) error {
 	var body io.Reader
 	if data.Body != nil {
